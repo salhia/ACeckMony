@@ -42,6 +42,7 @@ Route::post('/github-deploy', function (Request $request) {
     return response('Webhook received', 200);
 });
 
+
 Route::get('/dashboard', function () {
     return view ('dashboard');
 })->middleware(['auth', 'roles:user', 'verified'])->name('dashboard');
