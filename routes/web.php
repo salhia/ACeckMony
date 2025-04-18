@@ -332,7 +332,7 @@ Route::post('/agent/details/message', [IndexController::class, 'AgentDetailsMess
 Route::get('/rent/property', [IndexController::class, 'RentProperty'])->name('rent.property');
 
 //Get all Buy property
-Route::get('/buy/property', [IndexController::class, 'BuyProperty'])->name('buy.property');
+//Route::get('/buy/property', [IndexController::class, 'BuyProperty'])->name('buy.property');
 
 //Get Property type details
 Route::get('/property/type/{id}', [IndexController::class, 'PropertyType'])->name('property.type');
