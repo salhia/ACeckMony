@@ -35,11 +35,18 @@ Route::get('/clear', function () {
     return view('frontend.index'); // أو أي View تريده
 });
 
-Route::post('/github-deploy', function (Request $request) {
-    Log::info('Webhook triggered', $request->all());
+Route::post('/github-deploy', function () {
+    Log::info('Webhook triggered');
 
-    // يمكنك هنا تنفيذ عملية نشر أو أي أمر آخر
-    return response('Webhook received', 200);
+    // تنفيذ git pull إن أمكن
+    $output = [];
+    $status = null;
+    exec('cd /home/akec.money/public_html && git pull 2>&1', $output, $status);
+
+    Log::info('Git Pull Output:', $output);
+    Log::info('Git Pull Status: ' . $status);
+
+    return response('Git pull triggered.', 200);
 });
 
 Route::get('/dashboard', function () {
