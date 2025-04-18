@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AgentController;
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Backend\PropertyController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Backend\PropertyTypeController;
@@ -26,6 +27,13 @@ use App\Models\SmtpSetting;
 //user Frontend All Route
 Route::get('/', [UserController::class, 'index']);
 
+Route::get('/clear', function () {
+    Artisan::call('view:clear');
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+
+    return view('frontend.index'); // أو أي View تريده
+});
 
 Route::get('/dashboard', function () {
     return view ('dashboard');
