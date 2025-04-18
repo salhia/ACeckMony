@@ -3,9 +3,11 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
+use Illuminate\Http\Request;
 use App\Http\Controllers\AgentController;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Backend\PropertyController;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Backend\PropertyTypeController;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -33,6 +35,13 @@ Route::get('/clear', function () {
     Artisan::call('cache:clear');
 
     return view('frontend.index'); // أو أي View تريده
+});
+
+Route::post('/github-deploy', function (Request $request) {
+    Log::info('Webhook triggered', $request->all());
+
+    // يمكنك هنا تنفيذ عملية نشر أو أي أمر آخر
+    return response('Webhook received', 200);
 });
 
 Route::get('/dashboard', function () {
