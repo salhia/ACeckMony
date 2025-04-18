@@ -24,7 +24,7 @@ use App\Models\SmtpSetting;
 
 
 
-//user Frontend All Route
+//user Frontend All Route data
 Route::get('/', [UserController::class, 'index']);
 
 Route::get('/clear', function () {
