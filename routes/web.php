@@ -22,9 +22,7 @@ use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SettingController;
 use App\Models\SmtpSetting;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+
 
 //user Frontend All Route
 Route::get('/', [UserController::class, 'index']);
