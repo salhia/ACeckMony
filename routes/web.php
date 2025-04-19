@@ -27,6 +27,12 @@ use App\Models\SmtpSetting;
 //user Frontend All Route data
 Route::get('/', [UserController::class, 'index']);
 
+
+
+
+
+
+
 Route::get('/clear', function () {
     Artisan::call('view:clear');
     Artisan::call('config:clear');
@@ -304,9 +310,6 @@ Route::middleware(['auth', 'roles:agent'])->group(function () {
 
 
 //All user login Route
-Route::get('/admin/login', [AdminController::class, 'AdminLogin'])->name('admin.login')->middleware(RedirectIfAuthenticated::class);;
-Route::get('/agent/login', [AgentController::class, 'AgentLogin'])->name('agent.login')->middleware(RedirectIfAuthenticated::class);;
-Route::post('/agent/register', [AgentController::class, 'AgentRegister'])->name('agent.register');
 
 
 //Frontend Property Details All Route

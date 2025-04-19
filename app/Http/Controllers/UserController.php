@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     public function Index(){
-        return view('admin.index');
+        return view('admin.admin_login');
     }
 
 
