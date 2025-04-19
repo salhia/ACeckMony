@@ -61,10 +61,11 @@
                         <div class="card">
                             <div class="row">
                                 <div class="col-md-4 pe-md-0">
-                                    <div class="authlogin-side-wrapper">
-                                <img src="{{ asset('image/icon.png') }}" alt="Login Image" style="width: 50%; height: 50%; object-fit: cover;" />
-                                    </div>
-                                </div>
+    <div class="authlogin-side-wrapper" style="padding: 10px;">
+        <img src="{{ asset('image/icon.png') }}" alt="Login Image" style="width: 100%; height: auto;" />
+    </div>
+</div>
+
                                 <div class="col-md-8 ps-md-0">
                                     <div class="auth-form-wrapper px-4 py-5">
                                         <a href="#" class="noble-ui-logo logo-light d-block mb-2">Akeck<span>Money
