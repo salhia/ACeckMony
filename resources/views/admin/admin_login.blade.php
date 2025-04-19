@@ -62,7 +62,7 @@
                             <div class="row">
                                 <div class="col-md-4 pe-md-0">
                                     <div class="authlogin-side-wrapper">
-                                <img src="{{ asset('image/icon.png') }}" alt="Login Image" style="width: 100%; height: 100%; object-fit: cover;" />
+                                <img src="{{ asset('image/icon.png') }}" alt="Login Image" style="width: 50%; height: 50%; object-fit: cover;" />
                                     </div>
                                 </div>
                                 <div class="col-md-8 ps-md-0">
