@@ -1,7 +1,7 @@
 <nav class="sidebar">
     <div class="sidebar-header">
         <a href="{{ url('/') }}" target="_blank" class="sidebar-brand">
-             Akeck<span>Money</span>
+             Akec<span>Money</span>
         </a>
     </div>
 
