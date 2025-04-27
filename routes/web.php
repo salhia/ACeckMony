@@ -18,6 +18,7 @@ use App\Http\Controllers\Frontend\CompareController;
 use App\Http\Controllers\Backend\StateController;
 use App\Http\Controllers\Backend\TestimonialController;
 use App\Http\Controllers\Backend\BlogController;
+use App\Http\Controllers\TransferController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SettingController;
 use App\Models\SmtpSetting;
@@ -135,13 +136,14 @@ Route::middleware(['auth', 'roles:agent'])->group(function () {
 //User Group Middleware
 Route::middleware(['auth', 'roles:user'])->group(function () {
 
-    // User WishlistAll Route
-    Route::controller(WishlistController::class)->group(function () {
+    Route::get('/user/dashboard', [UserController::class, 'userDashboard'])->name('user.dashboard');
+    Route::get('/user/logout', [UserController::class, 'UserLogout'])->name('user.logout');
 
-        Route::get('/user/wishlist', 'UserWishlist')->name('user.wishlist');
-        Route::get('/get-wishlist-property', 'GetWishlistProperty');
-        Route::get('/wishlist-remove/{id}', 'WishlistRemove');
-    });
+    Route::get('/user/profile', [AgentController::class, 'AgentProfile'])->name('agent.profile');
+    Route::post('/user/profile/store', [AgentController::class, 'AgentProfileStore'])->name('agent.profile.store');
+    Route::get('/user/change/passowrd', [AgentController::class, 'AgentChangePassword'])->name('agent.change.password');
+    Route::post('/user/update/password', [AgentController::class, 'AgentUpdatePassword'])->name('agent.update.password');
+
 
     // User Compare Route
     Route::controller(CompareController::class)->group(function () {
@@ -154,6 +156,17 @@ Route::middleware(['auth', 'roles:user'])->group(function () {
     //Show User schedule request
     Route::get('/user/schedule/request', [UserController::class, 'UserScheduleRequest'])->name('user.schedule.request');
 });
+
+// مجموعة مسارات التحويل
+Route::prefix('transfers')->middleware(['auth', 'roles:user'])->group(function () {
+    Route::get('/create', [TransferController::class, 'create'])->name('transfers.create');
+    Route::post('/search-customer', [TransferController::class, 'searchCustomer'])->name('customers.search');
+    Route::post('/store-customer', [TransferController::class, 'storeCustomer'])->name('customers.store');
+    Route::post('/', [TransferController::class, 'store'])->name('transfers.store');
+    Route::get('/', [TransferController::class, 'index'])->name('transfers.index');
+});
+
+
 
 
 //Admin Group Middleware
@@ -398,3 +411,7 @@ Route::middleware(['auth', 'roles:admin'])->group(function () {
 
 //Schedule a tour
 Route::post('/store/schedule', [IndexController::class, 'StoreSchedule'])->name('store.schedule');
+
+
+//????????????????????????????????????????????????؟؟؟؟؟؟؟؟؟؟؟؟؟؟؟؟؟
+

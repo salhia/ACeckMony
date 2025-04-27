@@ -11,13 +11,12 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function Index(){
+     public function Index(){
         return view('admin.admin_login');
+     }
+     public function userDashboard(){
+        return view('agentuser.index');
     }
-
-
-
-
 
     public function UserProfile(){
         $id = Auth::user()->id;
@@ -33,7 +32,6 @@ class UserController extends Controller
         $data->email = $request->email;
         $data->phone = $request->phone;
         $data->address = $request->address;
-
         if ($request->file('photo')) {
             $file = $request->file('photo');
             @unlink(public_path('upload/user_images/'.$data->photo));
@@ -43,7 +41,6 @@ class UserController extends Controller
         }
 
         $data->save();
-
         $notification = array(
             'message' => 'User Profile Updated Successfully',
             'alert-type' => 'success'
@@ -55,7 +52,6 @@ class UserController extends Controller
     public function UserLogout (Request $request){
         // Auth::logout();
         // return redirect('/');
-
         //laravel default and its find on Aut->AuthenticatedSessionController.php
         Auth::guard('web')->logout();
 
@@ -68,7 +64,7 @@ class UserController extends Controller
             'alert-type' => 'success'
         );
 
-        return redirect('/login')->with($notification);
+        return redirect('/')->with($notification);
     }
 
     public function UserChangePassword(){

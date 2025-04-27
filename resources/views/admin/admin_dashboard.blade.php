@@ -50,7 +50,7 @@
 
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css">
 
-
+@stack('styles')
 
 </head>
 
@@ -151,7 +151,7 @@
     <!-- tinymce -->
 
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-
+@stack('scripts')
 </body>
 
 </html>
