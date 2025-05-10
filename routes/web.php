@@ -18,6 +18,7 @@ use App\Http\Controllers\Frontend\CompareController;
 use App\Http\Controllers\Backend\StateController;
 use App\Http\Controllers\Backend\TestimonialController;
 use App\Http\Controllers\Backend\BlogController;
+use App\Http\Controllers\DiscountMethodController;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SettingController;
@@ -51,9 +52,6 @@ Route::post('/github-deploy', function (Request $request) {
 
 
 
-Route::get('/dashboard', function () {
-    return view ('dashboard');
-})->middleware(['auth', 'roles:user', 'verified'])->name('dashboard');
 
 
 //User Management Group Middleware
@@ -130,6 +128,8 @@ Route::middleware(['auth', 'roles:agent'])->group(function () {
     Route::post('/agent/profile/store', [AgentController::class, 'AgentProfileStore'])->name('agent.profile.store');
     Route::get('/agent/change/passowrd', [AgentController::class, 'AgentChangePassword'])->name('agent.change.password');
     Route::post('/agent/update/password', [AgentController::class, 'AgentUpdatePassword'])->name('agent.update.password');
+
+
 }); //End Group Agent Middleware
 
 
@@ -158,20 +158,36 @@ Route::middleware(['auth', 'roles:user'])->group(function () {
 });
 
 // مجموعة مسارات التحويل
-Route::prefix('transfers')->middleware(['auth', 'roles:user'])->group(function () {
+    Route::prefix('transfers')->middleware(['auth', 'roles:user'])->group(function () {
     Route::get('/create', [TransferController::class, 'create'])->name('transfers.create');
     Route::post('/search-customer', [TransferController::class, 'searchCustomer'])->name('customers.search');
     Route::post('/store-customer', [TransferController::class, 'storeCustomer'])->name('customers.store');
     Route::post('/', [TransferController::class, 'store'])->name('transfers.store');
     Route::get('/', [TransferController::class, 'index'])->name('transfers.index');
+    Route::get('/transfers/{transfer}', [TransferController::class, 'show'])->name('transfers.show');
+    Route::get('/transfers/{id}/print', [TransferController::class, 'print'])->name('transfers.print');
+    Route::get('/transfers', [TransferController::class, 'index'])->name('transfers.index');
+    Route::get('/agent/received-transfers', [TransferController::class, 'receivedTransfers'])->name('agent.received.transfers');
+
+    Route::get('/agent/sending-transfers', [TransferController::class, 'SenderTransfers'])->name('agent.sending.transfers');
+
+
+Route::post('/transfers/update-status', [TransferController::class, 'updateStatusAjax'])->name('transfers.updateStatus.ajax');
+
+
+
+
+
 });
 
-
-
+// routes/web.php
+Route::prefix('agent')->middleware(['auth', 'agent'])->group(function () {
+    Route::get('discount/methods', [DiscountMethodController::class, 'edit'])->name('agent.discount.methods');
+    Route::put('discount/methods', [DiscountMethodController::class, 'update'])->name('agent.discount.methods.update');
+});
 
 //Admin Group Middleware
 Route::middleware(['auth', 'roles:admin'])->group(function () {
-
     //Property type All route
     Route::controller(PropertyTypeController::class)->group(function () {
         Route::get('/all/type', 'AllType')->name('all.type')->middleware('permission:all.type');
@@ -215,17 +231,6 @@ Route::middleware(['auth', 'roles:admin'])->group(function () {
         Route::get('/admin/message/details/{id}', 'AdminMessageDetails')->name('admin.message.details');
     });
 
-    // Agent All Route from admin
-    Route::controller(AdminController::class)->group(function () {
-
-        Route::get('/all/agent', 'AllAgent')->name('all.agent');
-        Route::get('/add/agent', 'AddAgent')->name('add.agent');
-        Route::post('/store/agent', 'StoreAgent')->name('store.agent');
-        Route::get('/edit/agent/{id}', 'EditAgent')->name('edit.agent');
-        Route::post('/update/agent', 'UpdateAgent')->name('update.agent');
-        Route::get('/delete/agent/{id}', 'DeleteAgent')->name('delete.agent');
-        Route::get('/changeStatus', 'changeStatus');
-    });
 
     // State  All Route
     Route::controller(StateController::class)->group(function () {
@@ -274,6 +279,17 @@ Route::prefix('admin')->middleware(['auth', 'roles:admin'])->group(function () {
 
 //Agent Group Middleware
 Route::middleware(['auth', 'roles:agent'])->group(function () {
+     // Agent All Route from admin
+        Route::controller(AgentController::class)->group(function () {
+        Route::get('/all/agent', 'AllAgent')->name('all.agent');
+        Route::get('/add/agent', 'AddAgent')->name('add.agent');
+        Route::post('/store/agent', 'StoreAgent')->name('store.agent');
+        Route::get('/edit/agent/{id}', 'EditAgent')->name('edit.agent');
+        Route::post('/update/agent', 'UpdateAgent')->name('update.agent');
+        Route::get('/delete/agent/{id}', 'DeleteAgent')->name('delete.agent');
+        Route::get('/changeStatus', 'changeStatus');
+    });
+
 
     // Agent All Property
     Route::controller(AgentPropertyController::class)->group(function () {

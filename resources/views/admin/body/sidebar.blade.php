@@ -20,7 +20,7 @@
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="collapse" href="#usersManagement" role="button" aria-expanded="false" aria-controls="usersManagement">
                     <i class="link-icon" data-feather="users"></i>
-                    <span class="link-title">Users Management</span>
+                    <span class="link-title">Agent Management</span>
                     <i class="link-arrow" data-feather="chevron-down"></i>
                 </a>
                 <div class="collapse" id="usersManagement">

@@ -31,8 +31,20 @@
                             <a href="{{ route('transfers.create') }}" class="nav-link">New Transfer</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">Transfer History</a>
+                            <a href="{{ route('agent.sending.transfers') }}" class="nav-link">Sending  Transfers  </a>
                         </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('agent.received.transfers') }}" class="nav-link"> Received Transfers </a>
+                        </li>
+
+                         <li class="nav-item">
+                            <a href="{{ route('transfers.index') }}" class="nav-link"> ALL Transfers </a>
+                        </li>
+
+
+
+
                     </ul>
                 </div>
             </li>

@@ -1,10 +1,12 @@
 @extends('agentuser.user_dashboard')
 @section('agentuser')
- <div class="page-content">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
+<div class="page-content">
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
             <h3 class="card-title">
-                <i class="fas fa-money-bill-transfer"></i> تحويل أموال
+                <i class="fas fa-money-bill-transfer"></i> Money Transfer
             </h3>
         </div>
 
@@ -12,211 +14,298 @@
             <form id="transferForm" method="POST" action="{{ route('transfers.store') }}">
                 @csrf
 
-                <!-- معلومات المرسل -->
+                <!-- State Information -->
+                <div class="form-group mb-4">
+                    <label for="state_code">State</label>
+                    <select class="form-control" id="state_code" name="state_code" required>
+                        <option value="">-- Select State --</option>
+                        @foreach($sys_regions as $state)
+                            <option value="{{ $state->id }}">{{ $state->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Sender Information -->
                 <div class="sender-info mb-4">
                     <h4 class="section-title">
-                        <i class="fas fa-user"></i> معلومات المرسل
+                        <i class="fas fa-user"></i> Sender Information
                     </h4>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="sender_id">اختر المرسل</label>
-                                <select class="form-control select2" id="sender_id" name="sender_id" required>
-                                    <option value="">-- اختر المرسل --</option>
-                                    @foreach($customers as $customer)
-                                        <option value="{{ $customer->id }}"
-                                            @if(old('sender_id') == $customer->id) selected @endif>
-                                            {{ $customer->name }} - {{ $customer->phone }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="sender_name">اسم المرسل</label>
-                                <input type="text" class="form-control" id="sender_name" readonly>
+                    <div class="form-group">
+                        <label for="sender_search">Search Sender</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="sender_search" placeholder="ID or Phone">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="searchSender">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
                             </div>
                         </div>
                     </div>
+                    <div id="senderResult" class="mt-3"></div>
+                    <input type="hidden" id="sender_id" name="sender_id">
                 </div>
 
-                <!-- معلومات المستلم -->
+                <!-- Receiver Information -->
                 <div class="receiver-info mb-4">
                     <h4 class="section-title">
-                        <i class="fas fa-user-plus"></i> معلومات المستلم
+                        <i class="fas fa-user-plus"></i> Receiver Information
                     </h4>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="receiver_search">ابحث عن المستلم</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="receiver_search"
-                                           placeholder="رقم الهوية أو الهاتف">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-outline-primary" type="button"
-                                                id="searchCustomer">
-                                            <i class="fas fa-search"></i> بحث
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div id="customerResult" class="mt-3">
-                                <!-- ستظهر نتائج البحث هنا -->
+                    <div class="form-group">
+                        <label for="receiver_search">Search Receiver</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="receiver_search" placeholder="ID or Phone">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-success" type="button" id="searchReceiver">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
                             </div>
                         </div>
                     </div>
+                    <div id="receiverResult" class="mt-3"></div>
+                    <input type="hidden" id="receiver_id" name="receiver_id">
+                </div>
 
-                    <!-- نموذج إضافة زبون جديد (مخفي بشكل افتراضي) -->
-                    <div id="newCustomerForm" style="display: none;">
-                        <hr>
-                        <h5 class="mb-3">إضافة زبون جديد</h5>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="new_name">الاسم الكامل</label>
-                                    <input type="text" class="form-control" id="new_name" name="new_name">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="new_phone">رقم الهاتف</label>
-                                    <input type="text" class="form-control" id="new_phone" name="new_phone">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="new_identity">رقم الهوية</label>
-                                    <input type="text" class="form-control" id="new_identity" name="new_identity">
-                                </div>
-                            </div>
-                        </div>
-                        <input type="hidden" id="receiver_id" name="receiver_id">
+                <!-- Transfer Details -->
+                <div class="transfer-details mb-4">
+                    <h4 class="section-title">
+                        <i class="fas fa-info-circle"></i> Transfer Details
+                    </h4>
+                    <div class="form-group">
+                        <label for="amount">Amount</label>
+                        <input type="number" class="form-control" id="amount" name="amount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="1"></textarea>
                     </div>
                 </div>
 
-                <!-- باقي النموذج (تفاصيل التحويل، الملخص، الأزرار) -->
-                <!-- ... (نفس الكود السابق) ... -->
-
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Complete Transfer
+                    </button>
+                </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Adding New Customer -->
+<div class="modal fade" id="customerModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" id="modalHeader">
+                <h5 class="modal-title" id="customerModalLabel">Add New Customer</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="customerForm">
+                    <input type="hidden" id="customer_type">
+                    <div class="form-group">
+                        <label for="customer_name">Full Name</label>
+                        <input type="text" class="form-control" id="customer_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer_phone">Phone Number</label>
+                        <input type="text" class="form-control" id="customer_phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer_identity">Identity Number</label>
+                        <input type="text" class="form-control" id="customer_identity">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveCustomer">Save</button>
+            </div>
         </div>
     </div>
 </div>
 @endsection
 
 @push('scripts')
-
 <script>
 $(document).ready(function() {
-    // تهيئة Select2
-    $('.select2').select2({
-        placeholder: "اختر المرسل",
-        allowClear: true
+    // Search for sender
+    $('#searchSender').click(function() {
+        const searchTerm = $('#sender_search').val().trim();
+        searchCustomer(searchTerm, 'sender');
     });
 
-    // البحث عن الزبون
-    $('#searchCustomer').click(function() {
-
-        alert("mmmmm");
+    // Search for receiver
+    $('#searchReceiver').click(function() {
         const searchTerm = $('#receiver_search').val().trim();
+        searchCustomer(searchTerm, 'receiver');
+    });
 
-        if(searchTerm.length < 3) {
-            alert('الرجاء إدخال رقم الهوية أو الهاتف (3 أحرف على الأقل)');
+    // Save new customer
+    $('#saveCustomer').click(function() {
+        const type = $('#customer_type').val();
+        const formData = {
+            name: $('#customer_name').val(),
+            phone: $('#customer_phone').val(),
+            identity_number: $('#customer_identity').val(),
+            _token: "{{ csrf_token() }}"
+        };
+
+        if (!formData.name || !formData.phone) {
+            showAlert('Please enter both name and phone number', 'danger');
             return;
         }
 
         $.ajax({
-            url: "{{ route('customers.search') }}",
+            url: "{{ route('customers.store') }}",
             method: 'POST',
-            data: {
-                _token: "{{ csrf_token() }}",
-                search: searchTerm
+            data: formData,
+            beforeSend: function() {
+                $('#saveCustomer').html('<i class="fas fa-spinner fa-spin"></i> Saving...');
+                $('#saveCustomer').prop('disabled', true);
             },
             success: function(response) {
-                if(response.found) {
-                    // عرض بيانات الزبون الموجود
-                    $('#customerResult').html(`
-                        <div class="alert alert-success">
-                            <h5>${response.customer.name}</h5>
-                            <p>الهاتف: ${response.customer.phone}</p>
-                            <p>الهوية: ${response.customer.identity_number}</p>
-                            <button type="button" class="btn btn-sm btn-primary mt-2"
-                                    onclick="selectCustomer(${response.customer.id}, '${response.customer.name}')">
-                                اختيار هذا الزبون
-                            </button>
-                        </div>
-                    `);
-                    $('#newCustomerForm').hide();
-                } else {
-                    // عرض خيار إضافة زبون جديد
-                    $('#customerResult').html(`
-                        <div class="alert alert-warning">
-                            <p>لا يوجد زبون مسجل بهذه البيانات</p>
-                            <button type="button" class="btn btn-sm btn-success"
-                                    onclick="showNewCustomerForm('${searchTerm}')">
-                                إضافة زبون جديد
-                            </button>
-                        </div>
-                    `);
+                if (response.success) {
+                    $('#customerModal').modal('hide');
+                    selectCustomer(response.customer.id, response.customer.name, type);
+                    showAlert(`${type === 'sender' ? 'Sender' : 'Receiver'} added successfully`, 'success');
                 }
+            },
+            error: function(xhr) {
+                const errorMsg = xhr.responseJSON?.message || 'An error occurred while saving';
+                showAlert(errorMsg, 'danger');
+            },
+            complete: function() {
+                $('#saveCustomer').html('Save');
+                $('#saveCustomer').prop('disabled', false);
             }
         });
     });
 });
 
-// اختيار زبون موجود
-function selectCustomer(customerId, customerName) {
-    $('#receiver_id').val(customerId);
-    $('#customerResult').html(`
-        <div class="alert alert-info">
-            <p>الزبون المحدد: <strong>${customerName}</strong></p>
-        </div>
-    `);
-    $('#newCustomerForm').hide();
-}
-
-// عرض نموذج إضافة زبون جديد
-function showNewCustomerForm(searchTerm) {
-    $('#newCustomerForm').show();
-    $('#new_phone').val(searchTerm);
-    $('#customerResult').html('');
-}
-
-// عند إدخال بيانات الزبون الجديد
-$('#newCustomerForm').on('submit', function(e) {
-    e.preventDefault();
-
-    const formData = {
-        name: $('#new_name').val(),
-        phone: $('#new_phone').val(),
-        identity_number: $('#new_identity').val(),
-        _token: "{{ csrf_token() }}"
-    };
+// Generic customer search function
+function searchCustomer(searchTerm, type) {
+    if (searchTerm.length < 3) {
+        showAlert('Please enter at least 3 characters (ID or phone)', 'warning');
+        return;
+    }
 
     $.ajax({
-        url: "{{ route('customers.store') }}",
+        url: "{{ route('customers.search') }}",
         method: 'POST',
-        data: formData,
+        data: {
+            _token: "{{ csrf_token() }}",
+            search: searchTerm
+        },
+        beforeSend: function() {
+            $(`#search${type === 'sender' ? 'Sender' : 'Receiver'}`).html('<i class="fas fa-spinner fa-spin"></i> Searching...');
+        },
         success: function(response) {
-            if(response.success) {
-                selectCustomer(response.customer.id, response.customer.name);
-                alert('تم إضافة الزبون بنجاح');
+            const resultDiv = $(`#${type}Result`);
+            if (response.found) {
+                resultDiv.html(`
+                    <div class="alert alert-success">
+                        <h5>${response.customer.name}</h5>
+                        <p>Phone: ${response.customer.phone}</p>
+                        <p>ID: ${response.customer.identity_number}</p>
+                        <button type="button" class="btn btn-sm btn-primary mt-2"
+                                onclick="selectCustomer(${response.customer.id}, '${response.customer.name}', '${type}')">
+                            Select this ${type === 'sender' ? 'sender' : 'receiver'}
+                        </button>
+                    </div>
+                `);
+            } else {
+                resultDiv.html(`
+                    <div class="alert alert-warning">
+                        <p>No ${type === 'sender' ? 'sender' : 'receiver'} found with this data</p>
+                        <button type="button" class="btn btn-sm btn-success"
+                                onclick="showCustomerModal('${searchTerm}', '${type}')">
+                            Add new ${type === 'sender' ? 'sender' : 'receiver'}
+                        </button>
+                    </div>
+                `);
             }
+        },
+        error: function(xhr) {
+            const errorMsg = xhr.responseJSON?.message || 'An error occurred during search';
+            showAlert(errorMsg, 'danger');
+        },
+        complete: function() {
+            $(`#search${type === 'sender' ? 'Sender' : 'Receiver'}`).html('<i class="fas fa-search"></i> Search');
         }
     });
-});
+}
+
+// Show add customer modal
+function showCustomerModal(searchTerm, type) {
+    $('#customer_type').val(type);
+    $('#customer_phone').val(searchTerm);
+    $('#customerModalLabel').text(`Add new ${type === 'sender' ? 'Sender' : 'Receiver'}`);
+    $('#modalHeader').removeClass('bg-primary bg-success').addClass(type === 'sender' ? 'bg-primary' : 'bg-success');
+    $('#saveCustomer').removeClass('btn-primary btn-success').addClass(type === 'sender' ? 'btn-primary' : 'btn-success');
+    $('#customer_name').val('');
+    $('#customer_identity').val('');
+    $('#customerModal').modal('show');
+}
+
+// Select customer and show confirmation
+function selectCustomer(customerId, customerName, type) {
+    $(`#${type}_id`).val(customerId);
+    $(`#${type}Result`).html(`
+        <div class="alert ${type === 'sender' ? 'alert-info' : 'alert-success'}">
+            <p>Selected ${type === 'sender' ? 'Sender' : 'Receiver'}: <strong>${customerName}</strong></p>
+        </div>
+    `);
+}
+
+// Show alert messages
+function showAlert(message, type) {
+    const alert = $(`<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+        ${message}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>`);
+
+    $('#transferForm').prepend(alert);
+    setTimeout(() => alert.alert('close'), 5000);
+}
 </script>
+
+@if ($errors->has('error'))
+<script>
+    $(document).ready(function () {
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-bottom-left",
+            "timeOut": "5000"
+        };
+        toastr.error("{{ $errors->first('error') }}", "Error");
+    });
+</script>
+@endif
 @endpush
 
 
 @section('styles')
 <style>
-/* ... (نفس الأنماط السابقة) ... */
-.select2-container--default .select2-selection--single {
-    height: 38px;
-    padding-top: 4px;
+.section-title {
+    color: #444;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+.alert {
+    margin-bottom: 0;
+}
+#modalHeader.bg-primary {
+    background-color: #007bff !important;
+}
+#modalHeader.bg-success {
+    background-color: #28a745 !important;
 }
 </style>
 @endsection
+
+

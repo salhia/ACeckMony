@@ -45,4 +45,27 @@ class SysTransaction extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function agent()
+{
+    return $this->belongsTo(User::class, 'sender_agent_id');
+}
+
+
+
+
+public function state()
+{
+    return $this->belongsTo(SysRegion::class, 'region_id', 'id');
+}
+
+public function region()
+{
+    return $this->belongsTo(SysRegion::class, 'region_id', 'id');
+}
+
+public function deliveredByUser()
+{
+    return $this->belongsTo(User::class, 'delivered_by');
+}
 }

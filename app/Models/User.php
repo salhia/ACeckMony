@@ -68,4 +68,17 @@ class User extends Authenticatable
         }
         return $hasPermission;
     }
+
+    public function region()
+{
+    return $this->belongsTo(SysRegion::class, 'region_id'); // أو 'region_id' حسب اسم العمود
+}
+
+
+
+public function parentAgent() {
+    return $this->belongsTo(User::class, 'parent_agent_id');
+}
+
+
 }

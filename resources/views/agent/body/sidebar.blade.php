@@ -21,19 +21,19 @@
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="collapse" href="#customersManagement" role="button" aria-expanded="false" aria-controls="customersManagement">
                     <i class="link-icon" data-feather="users"></i>
-                    <span class="link-title">Customers Management</span>
+                    <span class="link-title">agent Management</span>
                     <i class="link-arrow" data-feather="chevron-down"></i>
                 </a>
                 <div class="collapse" id="customersManagement">
                     <ul class="nav sub-menu">
                         <li class="nav-item">
-                            <a href="#" class="nav-link">Customers List</a>
+                            <a href="{{ route('all.agent') }}" class="nav-link">Agent List</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">Add New Customer</a>
+                            <a href="{{ route('add.agent') }}" class="nav-link">Add New Agent</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">Customers Settings</a>
+                            <a href="#" class="nav-link">Agent Settings</a>
                         </li>
                     </ul>
                 </div>

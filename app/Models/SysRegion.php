@@ -33,6 +33,11 @@ class SysAgentDistributor extends Model
     {
         return $this->belongsTo(User::class, 'distributor_id');
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(SysTransaction::class, 'agent_id');
+    }
 }
 
 
