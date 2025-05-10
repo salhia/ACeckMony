@@ -27,7 +27,6 @@
                                         <th>Sl </th>
                                         <th>Image </th>
                                         <th>Name </th>
-
                                         <th>Status </th>
                                         <th>Region</th>
                                         <th>Commission %</th>

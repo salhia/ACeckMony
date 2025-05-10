@@ -1,7 +1,6 @@
 @extends('agentuser.user_dashboard')
 @section('agentuser')
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-
 <div class="page-content">
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
@@ -9,22 +8,19 @@
                 <i class="fas fa-money-bill-transfer"></i> Money Transfer
             </h3>
         </div>
-
         <div class="card-body">
             <form id="transferForm" method="POST" action="{{ route('transfers.store') }}">
                 @csrf
-
                 <!-- State Information -->
                 <div class="form-group mb-4">
                     <label for="state_code">State</label>
-                    <select class="form-control" id="state_code" name="state_code" required>
+                    <select class="form-control" id="region_id" name="region_id" required>
                         <option value="">-- Select State --</option>
                         @foreach($sys_regions as $state)
                             <option value="{{ $state->id }}">{{ $state->name }}</option>
                         @endforeach
                     </select>
                 </div>
-
                 <!-- Sender Information -->
                 <div class="sender-info mb-4">
                     <h4 class="section-title">
@@ -44,7 +40,6 @@
                     <div id="senderResult" class="mt-3"></div>
                     <input type="hidden" id="sender_id" name="sender_id">
                 </div>
-
                 <!-- Receiver Information -->
                 <div class="receiver-info mb-4">
                     <h4 class="section-title">
@@ -64,7 +59,6 @@
                     <div id="receiverResult" class="mt-3"></div>
                     <input type="hidden" id="receiver_id" name="receiver_id">
                 </div>
-
                 <!-- Transfer Details -->
                 <div class="transfer-details mb-4">
                     <h4 class="section-title">

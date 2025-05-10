@@ -13,7 +13,7 @@ class SysTransaction extends Model
         'receiver_user_id', 'receiver_customer_id', 'receiver_agent_id',
         'amount', 'commission', 'admin_fee', 'net_amount', 'final_delivered_amount',
         'transaction_type_id', 'delivery_confirmation', 'delivery_proof',
-        'delivery_notes', 'notes', 'status', 'type', 'created_by'
+        'delivery_notes', 'notes', 'status', 'type', 'created_by','region_id'
     ];
 
     public function senderUser()

@@ -122,7 +122,9 @@ $user = auth()->user(); // المستخدم الحالي
     $validated = $request->validate([
         'sender_id' => 'required',
         'receiver_id' => 'required',
-        'amount' => 'required'
+        'amount' => 'required',
+         'region_id' => 'required|exists:sys_regions,id',  // ← هذا هو المهم
+
 
     ]);
 
@@ -150,10 +152,13 @@ $user = auth()->user(); // المستخدم الحالي
             'transaction_code' => $transactionCode,
             'sender_customer_id' => $validated['sender_id'],
             'receiver_customer_id' => $validated['receiver_id'],
-            'sender_user_id' => auth()->id(), // المستخدم الحالي كمرسل (إذا كان نظامك يسمح بذلك)
-           // 'receiver_user_id' => null, // يمكن تعديله حسب منطق عملك
+            'sender_user_id' => auth()->id(),
+             // المستخدم الحالي كمرسل (إذا كان نظامك يسمح بذلك)
+           'receiver_agent_id' => auth()->user()->agent_id ?? null, // إذا كان لديك وكلا
+          'region_id' => $validated['region_id'], // coming from dropdown
+             // المنطقة المرتبطة بالوكيل
             'sender_agent_id' => auth()->user()->agent_id ?? null, // إذا كان لديك وكلاء
-            'receiver_agent_id' => null,
+
             'amount' => $validated['amount'],
             'commission' => $commission,
             'admin_fee' => $adminFee,
