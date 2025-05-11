@@ -4,14 +4,26 @@
     <meta charset="utf-8">
     <title>Transfer Receipt</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; direction: rtl; }
+        body { font-family: DejaVu Sans, sans-serif; direction: ltr; }
         .title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
         .section { margin-bottom: 20px; }
         .line { margin: 4px 0; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            height: 60px;
+        }
     </style>
 </head>
 <body>
-    <div class="title">Transfer Receipt</div>
+    <div class="header">
+        <img src="{{ asset('image/icon.png') }}" alt="Logo" class="logo">
+        <div class="title">Transfer Receipt</div>
+    </div>
 
     <div class="section">
         <div class="line"><strong>Transaction Code:</strong> {{ $transaction->transaction_code }}</div>
