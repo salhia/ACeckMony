@@ -193,7 +193,7 @@ $agents = User::where('role', 'agent')
     'role' => 'user',
     'region_id' => $request->region_id,
     'commissionRate' => $request->commissionRate ?? 0,
-    'parent_agent_id' => $request->parent_agent_id ?? null,
+    'parent_agent_id' => auth()->id(),
     'transfer_limit' => $request->transfer_limit ?? 0,
     'is_active' => 1,
     'description' => $request->description,
@@ -242,7 +242,7 @@ $agents = User::where('role', 'agent')
      $user->region_id = $request->region_id;
      $user->commissionRate = $request->commissionRate ?? 0;
      $user->transfer_limit = $request->transfer_limit ?? 0;
-     $user->parent_agent_id = $request->parent_agent_id ?? null;
+   //  $user->parent_agent_id = $request->parent_agent_id ?? null;
      $user->description = $request->description ?? '';
      $user->updated_at = Carbon::now();
         // Save the changes to the database
