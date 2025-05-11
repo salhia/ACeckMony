@@ -10,7 +10,7 @@
 
         <nav class="page-breadcrumb">
             <ol class="breadcrumb">
-                <a href="{{ route('add.agent') }}" class="btn btn-inverse-info"> Add Agent</a>
+                <a href="{{ route('add.superagent') }}" class="btn btn-inverse-info"> Add Agent</a>
             </ol>
         </nav>
 
@@ -57,17 +57,15 @@
                                                 <a class="btn toggle-class {{ $item->status == 'active' ? 'btn-inverse-success' : 'btn-inverse-danger' }}"
                                                     title="Status" data-id="{{ $item->id }}"
                                                     data-status="{{ $item->status }}">
-
-                                                    <i
+                                                 <i
                                                         data-feather="{{ $item->status == 'active' ? 'toggle-left' : 'toggle-right' }}"></i>
                                                 </a>
 
-
-                                                <a href="{{ route('edit.agent', $item->id) }}"
+                                                <a href="{{ route('edit.superagent', $item->id) }}"
                                                     class="btn btn-inverse-warning" title="Edit"> <i
                                                         data-feather="edit"></i> </a>
 
-                                                <a href="{{ route('delete.agent', $item->id) }}"
+                                                <a href="{{ route('delete.superagent', $item->id) }}"
                                                     class="btn btn-inverse-danger" id="delete" title="Delete"> <i
                                                         data-feather="trash-2"></i> </a>
                                             </td>
@@ -93,7 +91,7 @@
                 $.ajax({
                     type: "GET",
                     dataType: "json",
-                    url: '/changeStatus',
+                    url: '/admin/changeStatus',
                     data: {
                         'status': status,
                         'user_id': user_id

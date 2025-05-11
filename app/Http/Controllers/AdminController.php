@@ -177,7 +177,7 @@ class AdminController extends Controller
         );
 
         // Redirect to the agents list page with notification
-        return redirect()->route('all.agent')->with($notification);
+        return redirect()->route('all.superagent')->with($notification);
     }
 
 
@@ -227,7 +227,7 @@ class AdminController extends Controller
         ];
 
 
-        return redirect()->route('all.agent')->with($notification);
+        return redirect()->route('all.superagent')->with($notification);
     }
 
     public function DeleteAgent(Request $request)

@@ -51,9 +51,6 @@ Route::post('/github-deploy', function (Request $request) {
 });
 
 
-
-
-
 //User Management Group Middleware
 Route::middleware(['auth', 'roles:user'])->group(function () {
 
@@ -116,12 +113,27 @@ Route::middleware(['auth', 'roles:admin'])->group(function () {
         Route::get('/edit/admin/{id}', 'EditAdmin')->name('edit.admin');
         Route::post('/update/admin/{id}', 'UpdateAdmin')->name('update.admin');
         Route::get('/delete/admin/{id}', 'DeleteAdmin')->name('delete.admin');
-    });
-}); //End Group Admin Middleware
+     });
+
+      // Agent All Route from admin
+        Route::controller(AdminController::class)->group(function () {
+        Route::get('/admin/all/agent', 'AllAgent')->name('all.superagent');
+        Route::get('/admin/add/agent', 'AddAgent')->name('add.superagent');
+        Route::post('/admin/store/agent', 'StoreAgent')->name('store.superagent');
+        Route::get('/admin/edit/agent/{id}', 'EditAgent')->name('edit.superagent');
+        Route::post('/admin/update/agent', 'UpdateAgent')->name('update.superagent');
+        Route::get('/admin/delete/agent/{id}', 'DeleteAgent')->name('delete.superagent');
+        Route::get('/admin/changeStatus', 'changeStatus');
+
+});
 
 
-//Agent Management Group Middleware
-Route::middleware(['auth', 'roles:agent'])->group(function () {
+
+     }); //End Group Admin Middleware
+
+
+  //Agent Management Group Middleware
+  Route::middleware(['auth', 'roles:agent'])->group(function () {
     Route::get('/agent/dashboard', [AgentController::class, 'AgentDashboard'])->name('agent.dashboard');
     Route::get('/agent/logout', [AgentController::class, 'AgentLogout'])->name('agent.logout');
     Route::get('/agent/profile', [AgentController::class, 'AgentProfile'])->name('agent.profile');

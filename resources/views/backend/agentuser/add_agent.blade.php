@@ -30,7 +30,7 @@
                                 </div>
                             @endif
 
-                            <form id="myForm" method="POST" action="{{ route('store.agent') }}" enctype="multipart/form-data" class="forms-sample">
+                            <form id="myForm" method="POST" action="{{ route('store.superagent') }}" enctype="multipart/form-data" class="forms-sample">
                                 @csrf
 
                                 <div class="form-group mb-3">

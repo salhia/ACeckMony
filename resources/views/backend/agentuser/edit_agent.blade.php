@@ -11,7 +11,7 @@
 
                             <h6 class="card-title">Update Agent Information</h6>
 
-                            <form id="myForm" method="POST" action="{{ route('update.agent') }}" enctype="multipart/form-data" class="forms-sample">
+                            <form id="myForm" method="POST" action="{{ route('update.superagent') }}" enctype="multipart/form-data" class="forms-sample">
                                 @csrf
 
                                 <input type="hidden" name="id" value="{{ $allagent->id }}">

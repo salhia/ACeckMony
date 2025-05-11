@@ -26,10 +26,10 @@
                 <div class="collapse" id="usersManagement">
                     <ul class="nav sub-menu">
                         <li class="nav-item">
-                            <a href="#" class="nav-link">Manage Agents</a>
+                            <a href="{{ route('all.superagent') }}" class="nav-link">Manage Agents</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">Add New Agent</a>
+                            <a href="{{ route('add.superagent') }}" class="nav-link">Add New Agent</a>
                         </li>
                         <li class="nav-item">
                             <a href="#" class="nav-link">Manage Roles & Permissions</a>
