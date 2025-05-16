@@ -35,8 +35,7 @@ class TransferController extends Controller
             return response()->json(['error' => 'بحث غير صحيح'], 400);
         }
 
-        $customer = SysCustomer::where('registered_by', auth()->id())
-                    ->where(function($query) use ($request) {
+        $customer = SysCustomer::where(function($query) use ($request) {
                         $query->where('phone', $request->search)
                               ->orWhere('identity_number', $request->search);
                     })
