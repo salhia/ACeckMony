@@ -9,7 +9,7 @@ class SysTransaction extends Model
     use HasFactory;
     protected $table = 'sys_transactions';
     protected $fillable = [
-        'transaction_code', 'sender_user_id', 'sender_customer_id', 'sender_agent_id',
+        'transaction_code', 'sender_user_id', 'sender_customer_id', 'sender_agent_id','sender_region_id',
         'receiver_user_id', 'receiver_customer_id', 'receiver_agent_id',
         'amount', 'commission', 'admin_fee', 'net_amount', 'final_delivered_amount',
         'transaction_type_id', 'delivery_confirmation', 'delivery_proof',
@@ -67,5 +67,21 @@ public function region()
 public function deliveredByUser()
 {
     return $this->belongsTo(User::class, 'delivered_by');
+}
+
+public function senderAgent()
+{
+    return $this->belongsTo(User::class, 'sender_agent_id');
+}
+
+public function senderregion()
+{
+    return $this->belongsTo(User::class, 'sender_region_id');
+}
+
+
+public function receiverAgent()
+{
+    return $this->belongsTo(User::class, 'receiver_agent_id');
 }
 }

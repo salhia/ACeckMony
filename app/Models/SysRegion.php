@@ -88,22 +88,7 @@ class SysAgentCommission extends Model
     }
 }
 
-class SysAgentEarning extends Model
-{
-    use HasFactory;
-    protected $table = 'sys_agent_earnings';
-    protected $fillable = ['agent_id', 'transaction_id', 'earned_amount'];
 
-    public function agent()
-    {
-        return $this->belongsTo(User::class, 'agent_id');
-    }
-
-    public function transaction()
-    {
-        return $this->belongsTo(SysTransaction::class, 'transaction_id');
-    }
-}
 
 class SysAccountMovement extends Model
 {

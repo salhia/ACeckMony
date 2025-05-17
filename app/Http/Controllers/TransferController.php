@@ -113,18 +113,16 @@ public function applyDiscount(Request $request)
 
    public function store(Request $request)
 {
-
-$user = auth()->user(); // المستخدم الحالي
-    $agent_id = $user->name ?? null;
+    $user = auth()->user();
+    $agent_id = $user->id;
+    $region_id = $user->region_id;
 
     // التحقق من صحة البيانات
     $validated = $request->validate([
         'sender_id' => 'required',
         'receiver_id' => 'required',
-        'amount' => 'required',
-         'region_id' => 'required|exists:sys_regions,id',  // ← هذا هو المهم
-
-
+        'amount' => 'required|numeric|min:0',
+        'region_id' => 'required|exists:sys_regions,id',
     ]);
 
     // التحقق من عدم تطابق المرسل والمستلم
@@ -135,14 +133,13 @@ $user = auth()->user(); // المستخدم الحالي
     }
 
     try {
-        // حساب العمولة والمبلغ الصافي (يمكن تعديل هذه الحسابات حسب متطلباتك)
-     //   $commissionRate = 0.01; // 1% عمولة
+        // حساب العمولة
         $commissionRate = $user->commissionRate ?? 0.01;
-
-        $adminFee = 0; // رسوم إدارية ثابتة
-        $commission = ($validated['amount'] * $commissionRate) / 100; // حساب العمولة
+        $commission = ($validated['amount'] * $commissionRate) / 100;
+        $adminFee = 0;
         $netAmount = $validated['amount'] - $commission - $adminFee;
         $finalDeliveredAmount = $netAmount;
+
         // إنشاء كود فريد للعملية
         $transactionCode = 'TRX-' . strtoupper(uniqid());
 
@@ -151,37 +148,35 @@ $user = auth()->user(); // المستخدم الحالي
             'transaction_code' => $transactionCode,
             'sender_customer_id' => $validated['sender_id'],
             'receiver_customer_id' => $validated['receiver_id'],
-            'sender_user_id' => auth()->id(),
-             // المستخدم الحالي كمرسل (إذا كان نظامك يسمح بذلك)
-           'receiver_agent_id' => auth()->user()->agent_id ?? null, // إذا كان لديك وكلا
-          'region_id' => $validated['region_id'], // coming from dropdown
-             // المنطقة المرتبطة بالوكيل
-            'sender_agent_id' => auth()->user()->agent_id ?? null, // إذا كان لديك وكلاء
 
+            // معلومات المرسل
+            'sender_user_id' => $agent_id,
+            'sender_agent_id' => $agent_id,
+            'sender_region_id' => $region_id,
+
+            // معلومات المستلم
+            'region_id' => $validated['region_id'],
+            'receiver_agent_id' => null, // سيتم تحديده عند الاستلام
+
+            // المبالغ والعمولات
             'amount' => $validated['amount'],
             'commission' => $commission,
             'admin_fee' => $adminFee,
             'net_amount' => $netAmount,
             'final_delivered_amount' => $finalDeliveredAmount,
-            'transaction_type_id' => 1, // يمكن استبداله بثابت أو اختيار من قاعدة البيانات
-            'status' => 'completed', // أو 'pending' حسب سير العمل
-          //  'type' => 'transfer', // يمكن أن يكون 'deposit', 'withdrawal' إلخ
-            'notes' =>  $request->input('notes', null), // ملاحظات إضافية
-            'created_by' => auth()->id()
+
+            // معلومات إضافية
+            'transaction_type_id' => 1,
+            'status' => 'completed',
+            'notes' => $request->input('notes'),
+            'created_by' => $agent_id
         ]);
-
-
-
-        // إضافة ملاحظات إضافية إذا كانت موجودة
-        // هنا يمكنك إضافة أي عمليات إضافية مثل:
-        // - إرسال إشعارات
-        // - تحديث أرصدة العملاء
-        // - تسجيل الحركات المالية
 
         return redirect()->route('transfers.show', $transaction->id)
             ->with('success', 'تمت عملية التحويل بنجاح. رقم العملية: ' . $transactionCode);
 
     } catch (\Exception $e) {
+        Log::error('Transfer Error: ' . $e->getMessage());
         return redirect()->back()
             ->withInput()
             ->withErrors(['error' => 'حدث خطأ أثناء معالجة التحويل: ' . $e->getMessage()]);

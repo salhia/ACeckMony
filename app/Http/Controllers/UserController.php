@@ -12,16 +12,17 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
      public function Index(){
-        return view('admin.admin_login');
+         return view('agentuser.index');
      }
+
      public function userDashboard(){
         return view('agentuser.index');
     }
 
     public function UserProfile(){
-        $id = Auth::user()->id;
-        $userData = User::find($id);
-        return view('frontend.dashboard.edit_profile',compact('userData'));
+        $id = Auth::user()->id; //collect user data from database
+        $profileData = User::find($id); //Laravel Eloquent
+        return view('agent.agent_profile_view',compact('profileData'));
     }
 
     public function UserProfileStore(Request $request){
@@ -64,11 +65,14 @@ class UserController extends Controller
             'alert-type' => 'success'
         );
 
-        return redirect('/')->with($notification);
+           return redirect()->route('login')->with($notification);
+
     }
 
     public function UserChangePassword(){
-        return view('frontend.dashboard.change_password');
+        $id = Auth::user()->id; //collect user data from database
+        $profileData = User::find($id); //Laravel Eloquent
+        return view('agent.agent_change_password',compact('profileData'));
     }
 
     public function UserPasswordUpdate(Request $request) {
@@ -103,10 +107,10 @@ class UserController extends Controller
 
 
     //User Schedule Request
-    public function UserScheduleRequest(){
-        $id = Auth::user()->id;
+    // public function UserScheduleRequest(){
+    //     $id = Auth::user()->id;
 
-        $srequest = Schedule::where('user_id',$id)->get();
-        return view('frontend.dashboard.schedule_request', compact('srequest'));
-    }
+    //     $srequest = Schedule::where('user_id',$id)->get();
+    //     return view('frontend.dashboard.schedule_request', compact('srequest'));
+    // }
 }

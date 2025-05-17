@@ -51,7 +51,7 @@ class AgentController extends Controller
             'alert-type' => 'success'
         );
 
-        return redirect('/')->with($notification);
+           return redirect()->route('login')->with($notification);
     }
 
     public function AgentProfile(){

@@ -27,31 +27,35 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
-        //Custom method for login notification on all user
-        $id = Auth::user()->id;
-        $adminData = User::find($id);
-        $username = $adminData->name;
+        $notification = array();
 
-        $notification = array(
-            'message' => ''.$username.' Login Successfully',
-            'alert-type' => 'success'
-        );
+        if (Auth::check()) {
+            $user = Auth::user();
+            $notification = [
+                'message' => $user->name . ' تم تسجيل الدخول بنجاح',
+                'alert-type' => 'success'
+            ];
 
-        $url = '';
-        if($request->user()->role === 'admin'){
-            $url = 'admin/dashboard';
-        }
-        elseif($request->user()->role === 'agent'){
-            $url = 'agent/dashboard';
-        }
-        elseif($request->user()->role === 'user'){
-            $url = 'user/dashboard';
+            switch($user->role) {
+                case 'admin':
+                    return redirect('/admin/dashboard')->with($notification);
+                case 'agent':
+
+                    return redirect('/agent/dashboard')->with($notification);
+                case 'user':
+                    return redirect('/user/dashboard')->with($notification);
+                default:
+                    return redirect('/')->with($notification);
+            }
         }
 
-        return redirect()->intended($url)->with($notification);
+        $notification = [
+            'message' => 'فشل تسجيل الدخول',
+            'alert-type' => 'error'
+        ];
+        return redirect()->route('login')->with($notification);
     }
 
     /**
@@ -60,11 +64,16 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        // Add a success message
+        $notification = array(
+            'message' => 'Logged Out Successfully',
+            'alert-type' => 'success'
+        );
+
+        // Redirect to login page with notification
+        return redirect('/')->with($notification);
     }
 }

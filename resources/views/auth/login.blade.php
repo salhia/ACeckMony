@@ -1,138 +1,168 @@
-@extends('frontend.frontend_dashboard')
+<!DOCTYPE html>
 
-@section('main')
-<!--Page Title-->
-        <section class="page-title-two bg-color-1 centred">
-            <div class="pattern-layer">
-                <div class="pattern-1" style="background-image: url({{ asset('frontend') }}/assets/images/shape/shape-9.png);"></div>
-                <div class="pattern-2" style="background-image: url({{ asset('frontend') }}/assets/images/shape/shape-10.png);"></div>
-            </div>
-            <div class="auto-container">
-                <div class="content-box clearfix">
-                    <h1>Sign In</h1>
-                    <ul class="bread-crumb clearfix">
-                        <li><a href="index.html">Home</a></li>
-                        <li>Sign In</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-        <!--End Page Title-->
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="Responsive HTML Admin Dashboard Template based on Bootstrap 5">
+    <meta name="author" content="NobleUI">
+    <meta name="keywords"
+        content="nobleui, bootstrap, bootstrap 5, bootstrap5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
+
+    <title>Admin Login Page </title>
+
+    <style type="text/css">
+        .authlogin-side-wrapper {
+            width: 100%;
+            height: 100%;
+            background-image: url({{ asset('upload/login.png') }});
+        }
+    </style>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- End fonts -->
+
+    <!-- core:css -->
+    <link rel="stylesheet" href="{{ asset('backend/assets/vendors/core/core.css') }}">
+    <!-- endinject -->
+
+    <!-- Plugin css for this page -->
+    <!-- End plugin css for this page -->
+
+    <!-- inject:css -->
+    <link rel="stylesheet" href="{{ asset('backend/assets/fonts/feather-font/css/iconfont.css') }}">
+    <link rel="stylesheet" href="{{ asset('backend/assets/vendors/flag-icon-css/css/flag-icon.min.css') }}">
+    <!-- endinject -->
+
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="{{ asset('backend/assets/css/demo2/style.css') }}">
+    <!-- End layout styles -->
+
+    <link rel="shortcut icon" href="{{ asset('image/icon.png') }}" />
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css">
+
+    <link rel="stylesheet" href="{{ asset('css/forced-colors.css') }}">
+
+</head>
+
+<body>
+    <div class="main-wrapper">
+        <div class="page-wrapper full-page">
+            <div class="page-content d-flex align-items-center justify-content-center">
+
+                <div class="row w-100 mx-0 auth-page">
+                    <div class="col-md-8 col-xl-6 mx-auto">
+                        <div class="card">
+                            <div class="row">
+                                <div class="col-md-4 pe-md-0">
+    <div class="authlogin-side-wrapper" style="padding: 10px;">
+        <img src="{{ asset('image/icon.png') }}" alt="Login Image" style="width: 100%; height: auto;" />
+    </div>
+</div>
+
+                                <div class="col-md-8 ps-md-0">
+                                    <div class="auth-form-wrapper px-4 py-5">
+                                        <a href="#" class="noble-ui-logo logo-light d-block mb-2">Akec<span>Money
+                                            </span></a>
+                                        <h5 class="text-muted fw-normal mb-4"> Welcome back! Log in to your account.</h5>
 
 
-        <!-- ragister-section -->
-        <section class="ragister-section centred sec-pad">
-            <div class="auto-container">
-                <div class="row clearfix">
-                    <div class="col-xl-8 col-lg-12 col-md-12 offset-xl-2 big-column">
-                        <div class="tabs-box">
-                            <div class="tab-btn-box">
-                                <ul class="tab-btns tab-buttons centred clearfix">
-                                    <li class="tab-btn active-btn" data-tab="#tab-1">Sign in</li>
-                                    <li class="tab-btn" data-tab="#tab-2">Register</li>
-                                </ul>
-                            </div>
-                            <div class="tabs-content">
-                                <div class="tab active-tab" id="tab-1">
-                                    <div class="inner-box">
-                                        <h4>Sign in</h4>
-
-                                        <form action="{{ route('login') }}" method="post" class="default-form">
+                                        <form class="forms-sample" method="post" action="{{ route('login') }}">
                                             @csrf
 
-                                            <div class="form-group">
-                                                <label>Email/Name/Phone</label>
-                                                <input type="text" name="login" id="login" required="">
+                                            <div class="mb-3">
+                                                <label for="login" class="form-label">Email/Name/Phone </label>
+                                                <input type="text" name="login" class="form-control" id="login"
+                                                    placeholder="Email">
                                             </div>
 
-                                            <div class="form-group">
-                                                <label>Password</label>
-                                                <input type="password" name="password" id="password" required="">
+                                            <div class="mb-3">
+                                                <label for="userPassword" class="form-label">Password</label>
+                                                <input type="password" class="form-control" id="password"
+                                                    name="password" autocomplete="current-password"
+                                                    placeholder="Password">
                                             </div>
-                                            <div class="form-group message-btn">
-                                                <button type="submit" class="theme-btn btn-one">Sign in</button>
+                                            <div class="form-check mb-3">
+                                                <input type="checkbox" class="form-check-input" id="authCheck">
+                                                <label class="for m-check-label" for="authCheck">
+                                                    Remember me
+                                                </label>
                                             </div>
-                                        </form>
-                                        <div class="othre-text">
-                                            <p>Have not any account? <a href="{{ route('register') }}">Register Now</a></p>
-                                        </div>
-                                    </div>
-                                </div>
+                                            <div>
 
-                                <div class="tab" id="tab-2">
-                                    <div class="inner-box">
-                                        <h4>Register</h4>
+                                                <button type="submit"
+                                                    class="btn btn-outline-primary btn-icon-text mb-2 mb-md-0">
+                                                    Login
 
-                                        <form action="{{ route('register') }}" method="post" class="default-form">
-                                            @csrf
-
-
-                                            <div class="form-group">
-
-                                                <label>User name</label>
-                                                <input type="text" name="name" id="name" required="">
-                                                <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                                                </button>
                                             </div>
-                                            <div class="form-group">
-                                                <label>Email address</label>
-                                                <input type="email" name="email" id="email" required="">
-                                                <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Password</label>
-                                                <input type="password" name="password" id="password" required="">
-                                                <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                                            </div>
-
-                                             <div class="form-group">
-                                                <label>Confirm Password</label>
-                                                <input type="password" name="password_confirmation" id="password_confirmation" required="">
-                                                <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-                                            </div>
-
-                                            <div class="form-group message-btn">
-                                                <button type="submit" class="theme-btn btn-one">Register</button>
-                                            </div>
+                                            {{-- <a href="register.html" class="d-block mt-3 text-muted">Not a user? Sign
+                                                up</a> --}}
                                         </form>
 
-                                        <div class="othre-text">
-                                            <p>Have not any account? <a href="{{ route('register') }}">Register Now</a></p>
-                                        </div>
+
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
-        </section>
-        <!-- ragister-section end -->
+        </div>
+    </div>
+
+    <!-- core:js -->
+    <script src="{{ asset('backend/assets/vendors/core/core.js') }}"></script>
+    <!-- endinject -->
+
+    <!-- Plugin js for this page -->
+    <!-- End plugin js for this page -->
+
+    <!-- inject:js -->
+    <script src="{{ asset('backend/assets/vendors/feather-icons/feather.min.js') }}"></script>
+    <script src="{{ asset('backend/assets/js/template.js') }}"></script>
+    <!-- endinject -->
+
+    {{-- toaster --}}
+     <!-- Custom js for this page -->
+     <script src="{{ asset('backend/assets/js/dashboard-dark.js') }}"></script>
+     <!-- End custom js for this page -->
+
+     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+     <script>
+      @if(Session::has('message'))
+      var type = "{{ Session::get('alert-type','info') }}"
+      switch(type){
+         case 'info':
+         toastr.info(" {{ Session::get('message') }} ");
+         break;
+
+         case 'success':
+         toastr.success(" {{ Session::get('message') }} ");
+         break;
+
+         case 'warning':
+         toastr.warning(" {{ Session::get('message') }} ");
+         break;
+
+         case 'error':
+         toastr.error(" {{ Session::get('message') }} ");
+         break;
+      }
+      @endif
+     </script>
 
 
-        <!-- subscribe-section -->
-        <section class="subscribe-section bg-color-3">
-            <div class="pattern-layer" style="background-image: url({{ asset('frontend') }}/assets/images/shape/shape-2.png);"></div>
-            <div class="auto-container">
-                <div class="row clearfix">
-                    <div class="col-lg-6 col-md-6 col-sm-12 text-column">
-                        <div class="text">
-                            <span>Subscribe</span>
-                            <h2>Sign Up To Our Newsletter To Get The Latest News And Offers.</h2>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 form-column">
-                        <div class="form-inner">
-                            <form action="contact.html" method="post" class="subscribe-form">
-                                <div class="form-group">
-                                    <input type="email" name="email" placeholder="Enter your email" required="">
-                                    <button type="submit">Subscribe Now</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+</body>
 
-        @endsection
-        <!-- subscribe-section end -->
+</html>

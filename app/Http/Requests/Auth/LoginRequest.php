@@ -43,21 +43,26 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        $user = User::where('email',$this->login)
-                    ->orWhere('name',$this->login)
-                    ->orWhere('phone',$this->login)
+        $user = User::where('email', $this->login)
+                    ->orWhere('name', $this->login)
+                    ->orWhere('phone', $this->login)
                     ->first();
 
-
-        if ( !$user || !Hash::check($this->password,$user->password)) {
+        if (!$user) {
             RateLimiter::hit($this->throttleKey());
-
             throw ValidationException::withMessages([
-                'login' => trans('auth.failed'),
+                'login' => 'المستخدم غير موجود. الرجاء التأكد من البريد الإلكتروني/الاسم/رقم الهاتف',
             ]);
         }
 
-        Auth::login($user,$this->boolean('remember'));
+        if (!Hash::check($this->password, $user->password)) {
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages([
+                'password' => 'كلمة المرور غير صحيحة',
+            ]);
+        }
+
+        Auth::login($user, $this->boolean('remember'));
         RateLimiter::clear($this->throttleKey());
     }
 

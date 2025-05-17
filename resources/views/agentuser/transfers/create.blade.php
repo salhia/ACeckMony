@@ -68,6 +68,22 @@
                         <label for="amount">Amount</label>
                         <input type="number" class="form-control" id="amount" name="amount" required>
                     </div>
+
+                    <!-- Commission Details -->
+                    <div class="commission-details mt-3">
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-calculator"></i> تفاصيل العملية:</h6>
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <p>المبلغ الأساسي: <span id="baseAmount">0</span></p>
+                                    <p>نسبة العمولة: <span id="commissionRate">{{ auth()->user()->commissionRate ?? 0 }}%</span></p>
+                                    <p>قيمة العمولة: <span id="commissionAmount">0</span></p>
+                                    <p>صافي المبلغ: <span id="netAmount">0</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="notes">Notes</label>
                         <textarea class="form-control" id="notes" name="notes" rows="1"></textarea>
@@ -263,6 +279,27 @@ function showAlert(message, type) {
 
     $('#transferForm').prepend(alert);
     setTimeout(() => alert.alert('close'), 5000);
+}
+
+// حساب العمولة عند تغيير المبلغ
+document.getElementById('amount').addEventListener('input', function() {
+    calculateCommission();
+});
+
+function calculateCommission() {
+    const amount = parseFloat(document.getElementById('amount').value) || 0;
+    const commissionRate = {{ auth()->user()->commissionRate ?? 0 }};
+
+    // حساب العمولة
+    const commission = (amount * commissionRate) / 100;
+
+    // حساب صافي المبلغ
+    const netAmount = amount - commission;
+
+    // تحديث العرض
+    document.getElementById('baseAmount').textContent = amount.toFixed(2);
+    document.getElementById('commissionAmount').textContent = commission.toFixed(2);
+    document.getElementById('netAmount').textContent = netAmount.toFixed(2);
 }
 </script>
 
