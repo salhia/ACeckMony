@@ -148,4 +148,31 @@ class TransferVerificationController extends Controller
 
         return $pdf->download('transfer_' . $transfer->transaction_code . '.pdf');
     }
+
+    public function verifyWithCode($code)
+    {
+        $transfer = SysTransaction::where('verification_code', $code)
+            ->with(['senderCustomer', 'receiverCustomer'])
+            ->first();
+
+        if (!$transfer) {
+            return redirect()->route('transfers.verify')
+                ->with('error', 'Invalid verification code. Please try again.');
+        }
+
+        return view('transfers.verify', [
+            'directVerification' => true,
+            'transfer' => [
+                'id' => $transfer->id,
+                'transaction_code' => $transfer->transaction_code,
+                'amount' => number_format($transfer->amount, 2),
+                'status' => $transfer->status,
+                'date' => $transfer->created_at->format('Y-m-d H:i:s'),
+                'sender_name' => $transfer->senderCustomer ? $transfer->senderCustomer->name : 'N/A',
+                'receiver_name' => $transfer->receiverCustomer ? $transfer->receiverCustomer->name : 'N/A',
+                'qr_code' => route('transfers.qr-code', $transfer->id),
+                'pdf_url' => route('transfers.download.pdf', $transfer->id)
+            ]
+        ]);
+    }
 }

@@ -275,15 +275,23 @@ Route::post('/profile/update-password', [ProfileController::class, 'updatePasswo
 
    });
 
-// Transfer Verification Routes
-Route::get('/verify-transfer', [TransferVerificationController::class, 'showVerificationPage'])->name('transfers.verify');
-Route::get('/transfer/{id}/qr-code', [TransferVerificationController::class, 'generateQrCode'])->name('transfers.qr-code');
-Route::get('/transfer/{id}/pdf', [TransferVerificationController::class, 'downloadPdf'])->name('transfers.download.pdf');
+// Public Transfer Verification Routes
+Route::domain('akec.money')->group(function () {
+    // Simple verification URL
+    Route::get('/verify', [TransferVerificationController::class, 'showVerificationPage'])->name('transfers.verify');
 
-// API Routes for Transfer Verification
-Route::group(['prefix' => 'api', 'middleware' => ['web']], function () {
-    Route::post('/transfers/verify-phone', [TransferVerificationController::class, 'verifyPhone'])->name('api.transfers.verify-phone');
-    Route::post('/transfers/verify-qr', [TransferVerificationController::class, 'verifyQrCode'])->name('api.transfers.verify-qr');
+    // Direct transfer verification with code
+    Route::get('/verify/{code}', [TransferVerificationController::class, 'verifyWithCode'])->name('transfers.verify.code');
+
+    // QR code and PDF routes
+    Route::get('/transfer/{id}/qr', [TransferVerificationController::class, 'generateQrCode'])->name('transfers.qr-code');
+    Route::get('/transfer/{id}/pdf', [TransferVerificationController::class, 'downloadPdf'])->name('transfers.download.pdf');
+
+    // API Routes for Transfer Verification
+    Route::group(['prefix' => 'api'], function () {
+        Route::post('/verify-phone', [TransferVerificationController::class, 'verifyPhone'])->name('api.transfers.verify-phone');
+        Route::post('/verify-qr', [TransferVerificationController::class, 'verifyQrCode'])->name('api.transfers.verify-qr');
+    });
 });
 
 

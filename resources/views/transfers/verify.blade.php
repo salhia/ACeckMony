@@ -180,6 +180,14 @@
             }
         });
 
+        // Handle direct verification if transfer data is provided
+        @if(isset($directVerification) && $directVerification)
+            $(document).ready(function() {
+                displayTransfers([{!! json_encode($transfer) !!}]);
+                showStep('transfers');
+            });
+        @endif
+
         function showStep(stepId) {
             $('.step').removeClass('active');
             $(`#step-${stepId}`).addClass('active');
@@ -262,5 +270,13 @@
             });
         }
     </script>
+
+    @if(session('error'))
+    <script>
+        $(document).ready(function() {
+            alert('{{ session('error') }}');
+        });
+    </script>
+    @endif
 </body>
 </html>
