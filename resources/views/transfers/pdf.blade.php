@@ -20,15 +20,19 @@
             margin-bottom: 30px;
             border-bottom: 2px solid #007bff;
             padding-bottom: 20px;
+            position: relative;
         }
         .logo {
-            max-width: 150px;
+            width: 120px;
+            height: auto;
             margin-bottom: 15px;
+            display: block;
+            margin: 0 auto;
         }
         .title {
             color: #007bff;
             font-size: 24px;
-            margin: 0;
+            margin: 10px 0;
         }
         .transfer-details {
             background-color: #f8f9fa;
@@ -119,9 +123,7 @@
 <body>
     <div class="container">
         <div class="header">
-            @if(config('app.logo'))
-                <img src="{{ config('app.logo') }}" alt="Logo" class="logo">
-            @endif
+            <img src="{{ public_path('image/icon.png') }}" alt="AKEC Money Logo" class="logo">
             <h1 class="title">Transfer Details</h1>
         </div>
 
