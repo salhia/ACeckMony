@@ -26,6 +26,7 @@ use App\Models\SmtpSetting;
 use App\Http\Controllers\AgentDashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CommissionController;
+use App\Http\Controllers\TransferVerificationController;
 
 //user Frontend All Route data
 Route::get('/', [AgentDashboardController::class, 'index']);
@@ -273,6 +274,17 @@ Route::post('/profile/update-password', [ProfileController::class, 'updatePasswo
     Route::post('/transfers/update-status', [TransferController::class, 'updateStatusAjax'])->name('transfers.updateStatus.ajax');
 
    });
+
+// Transfer Verification Routes
+Route::get('/verify-transfer', [TransferVerificationController::class, 'showVerificationPage'])->name('transfers.verify');
+Route::get('/transfer/{id}/qr-code', [TransferVerificationController::class, 'generateQrCode'])->name('transfers.qr-code');
+Route::get('/transfer/{id}/pdf', [TransferVerificationController::class, 'downloadPdf'])->name('transfers.download.pdf');
+
+// API Routes for Transfer Verification
+Route::group(['prefix' => 'api', 'middleware' => ['web']], function () {
+    Route::post('/transfers/verify-phone', [TransferVerificationController::class, 'verifyPhone'])->name('api.transfers.verify-phone');
+    Route::post('/transfers/verify-qr', [TransferVerificationController::class, 'verifyQrCode'])->name('api.transfers.verify-qr');
+});
 
 
 
