@@ -6,7 +6,7 @@ use App\Models\SysTransaction;
 use App\Models\SysCustomer;
 use Illuminate\Http\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransferVerificationController extends Controller
 {
@@ -18,6 +18,7 @@ class TransferVerificationController extends Controller
     public function verifyPhone(Request $request)
     {
         $phone = $request->input('phone');
+        $type = $request->input('type', 'receiver'); // 'sender' or 'receiver'
 
         // First find the customer by phone number
         $customer = SysCustomer::where('phone', $phone)->first();
@@ -26,8 +27,13 @@ class TransferVerificationController extends Controller
             return response()->json(['hasTransfers' => false]);
         }
 
-        // Get all transfers for this customer
-        $transfers = SysTransaction::where('receiver_customer_id', $customer->id)
+        // Get all transfers for this customer based on type
+        $transfers = SysTransaction::when($type === 'receiver', function($query) use ($customer) {
+                return $query->where('receiver_customer_id', $customer->id);
+            })
+            ->when($type === 'sender', function($query) use ($customer) {
+                return $query->where('sender_customer_id', $customer->id);
+            })
             ->with(['senderCustomer', 'receiverCustomer'])
             ->get();
 
@@ -35,16 +41,20 @@ class TransferVerificationController extends Controller
             return response()->json(['hasTransfers' => false]);
         }
 
-        // Generate QR codes for each transfer
+        // Generate data for each transfer
         $transfersData = $transfers->map(function ($transfer) {
             return [
                 'id' => $transfer->id,
                 'transaction_code' => $transfer->transaction_code,
                 'amount' => number_format($transfer->amount, 2),
+                'commission' => number_format($transfer->commission, 2),
+                'net_amount' => number_format($transfer->amount - $transfer->commission, 2),
                 'status' => $transfer->status,
                 'date' => $transfer->created_at->format('Y-m-d H:i:s'),
                 'sender_name' => $transfer->senderCustomer ? $transfer->senderCustomer->name : 'N/A',
+                'sender_phone' => $transfer->senderCustomer ? $transfer->senderCustomer->phone : 'N/A',
                 'receiver_name' => $transfer->receiverCustomer ? $transfer->receiverCustomer->name : 'N/A',
+                'receiver_phone' => $transfer->receiverCustomer ? $transfer->receiverCustomer->phone : 'N/A',
                 'qr_code' => route('transfers.qr-code', $transfer->id),
                 'pdf_url' => route('transfers.download.pdf', $transfer->id)
             ];
@@ -52,7 +62,8 @@ class TransferVerificationController extends Controller
 
         return response()->json([
             'hasTransfers' => true,
-            'transfers' => $transfersData
+            'transfers' => $transfersData,
+            'type' => $type
         ]);
     }
 
@@ -141,7 +152,9 @@ class TransferVerificationController extends Controller
             'sender' => $transfer->senderCustomer,
             'receiver' => $transfer->receiverCustomer,
             'date' => $transfer->created_at->format('Y-m-d H:i:s'),
-            'amount' => number_format($transfer->amount, 2)
+            'amount' => number_format($transfer->amount, 2),
+            'commission' => number_format($transfer->commission, 2),
+            'net_amount' => number_format($transfer->amount - $transfer->commission, 2)
         ];
 
         $pdf = PDF::loadView('transfers.pdf', $data);

@@ -112,6 +112,29 @@
             color: #666;
             margin-left: 5px;
         }
+        .financial-details {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .financial-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #dee2e6;
+        }
+        .financial-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+        }
+        .financial-label {
+            color: #6c757d;
+        }
+        .financial-value {
+            font-weight: 600;
+            color: #28a745;
+        }
     </style>
 </head>
 <body>
@@ -138,14 +161,20 @@
                                 <p class="text-muted">We'll verify if you have any transfers</p>
                             </div>
                             <div class="form-group">
-                                <input type="tel" class="form-control phone-input text-center"
-                                       id="phone" placeholder="Enter your phone number"
-                                       pattern="[0-9]{10}">
-                            </div>
-                            <div class="text-center mt-4">
-                                <button class="btn btn-primary text-white" onclick="verifyPhone()">
-                                    Verify Number
-                                </button>
+                                <div class="btn-group w-100 mb-3" role="group">
+                                    <input type="radio" class="btn-check" name="userType" id="senderType" value="sender" checked>
+                                    <label class="btn btn-outline-primary" for="senderType">I am the Sender</label>
+
+                                    <input type="radio" class="btn-check" name="userType" id="receiverType" value="receiver">
+                                    <label class="btn btn-outline-primary" for="receiverType">I am the Receiver</label>
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                    <input type="tel" class="form-control" id="phoneNumber" placeholder="Enter your phone number">
+                                    <button class="btn btn-primary" type="button" id="verifyPhone">
+                                        Verify
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -175,6 +204,53 @@
     <div class="loading-overlay" id="loading-overlay">
         <div class="loading-spinner"></div>
     </div>
+
+    <!-- Transfer Card Template -->
+    <template id="transferCardTemplate">
+        <div class="transfer-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">Transaction: <span class="transaction-code"></span></h6>
+                <span class="transfer-status"></span>
+            </div>
+            <div class="amount-display">
+                <span class="amount"></span>
+                <span class="currency">SSP</span>
+            </div>
+            <div class="financial-details">
+                <div class="financial-item">
+                    <span class="financial-label">Base Amount:</span>
+                    <span class="financial-value amount"></span>
+                </div>
+                <div class="financial-item">
+                    <span class="financial-label">Commission:</span>
+                    <span class="financial-value commission"></span>
+                </div>
+                <div class="financial-item">
+                    <span class="financial-label">Net Amount:</span>
+                    <span class="financial-value net-amount"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="row">
+                    <div class="col-6">
+                        <small class="text-muted">Sender</small>
+                        <div class="sender-name"></div>
+                        <div class="sender-phone text-muted"></div>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Receiver</small>
+                        <div class="receiver-name"></div>
+                        <div class="receiver-phone text-muted"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <a href="#" class="btn btn-download download-pdf">
+                    <i class="fas fa-download me-2"></i>Download PDF
+                </a>
+            </div>
+        </div>
+    </template>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -212,27 +288,26 @@
         }
 
         function verifyPhone() {
-            const phone = $('#phone').val();
+            const phone = $('#phoneNumber').val();
+            const type = $('input[name="userType"]:checked').val();
+
             if (!phone) {
                 alert('Please enter your phone number');
                 return;
             }
 
             showLoading();
-            const button = $('.btn-primary');
-            const originalText = button.html();
-            button.html('<i class="fas fa-spinner fa-spin"></i> Verifying...').prop('disabled', true);
 
             $.ajax({
-                url: '/verify-phone',
+                url: '/transfers/verify-phone',
                 method: 'POST',
-                data: { phone: phone },
+                data: { phone, type },
                 success: function(response) {
                     if (response.hasTransfers) {
-                        displayTransfers(response.transfers);
+                        displayTransfers(response.transfers, response.type);
                         showStep('transfers');
                     } else {
-                        alert('No transfers found for this number');
+                        alert('No transfers found for this phone number');
                     }
                 },
                 error: function(xhr) {
@@ -240,33 +315,59 @@
                     alert(xhr.responseJSON?.message || 'Verification failed. Please try again.');
                 },
                 complete: function() {
-                    button.html(originalText).prop('disabled', false);
                     hideLoading();
                 }
             });
         }
 
-        function displayTransfers(transfers) {
+        function displayTransfers(transfers, type) {
             const container = $('#transfers-container');
             container.empty();
 
             transfers.forEach(transfer => {
                 const card = $(`
                     <div class="transfer-card">
-                        <div class="text-center">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">Transaction: <span class="transaction-code">${transfer.transaction_code}</span></h6>
                             <span class="transfer-status status-${transfer.status.toLowerCase()}">
                                 ${transfer.status}
                             </span>
                         </div>
                         <div class="amount-display">
-                            ${transfer.amount} <span class="currency">SSP</span>
+                            <span class="amount">${transfer.amount}</span>
+                            <span class="currency">SSP</span>
                         </div>
-                        <div class="qr-code-container">
-                            <img src="${transfer.qr_code}" alt="QR Code">
+                        <div class="financial-details">
+                            <div class="financial-item">
+                                <span class="financial-label">Base Amount:</span>
+                                <span class="financial-value amount">${transfer.base_amount}</span>
+                            </div>
+                            <div class="financial-item">
+                                <span class="financial-label">Commission:</span>
+                                <span class="financial-value commission">${transfer.commission}</span>
+                            </div>
+                            <div class="financial-item">
+                                <span class="financial-label">Net Amount:</span>
+                                <span class="financial-value net-amount">${transfer.net_amount}</span>
+                            </div>
                         </div>
-                        <div class="text-center mt-3">
+                        <div class="mb-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Sender</small>
+                                    <div class="sender-name">${transfer.sender_name}</div>
+                                    <div class="sender-phone text-muted">${transfer.sender_phone}</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Receiver</small>
+                                    <div class="receiver-name">${transfer.receiver_name}</div>
+                                    <div class="receiver-phone text-muted">${transfer.receiver_phone}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
                             <a href="${transfer.pdf_url}" class="btn btn-download" target="_blank">
-                                <i class="fas fa-file-pdf me-2"></i>Download Details
+                                <i class="fas fa-file-pdf me-2"></i>Download PDF
                             </a>
                         </div>
                     </div>

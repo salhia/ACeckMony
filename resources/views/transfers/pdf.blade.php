@@ -61,6 +61,32 @@
         .detail-value {
             color: #212529;
         }
+        .financial-summary {
+            background-color: #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .financial-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed #dee2e6;
+        }
+        .financial-row:last-child {
+            border-bottom: none;
+            padding-top: 15px;
+            margin-top: 5px;
+            border-top: 2px solid #dee2e6;
+        }
+        .financial-label {
+            color: #495057;
+            font-weight: bold;
+        }
+        .financial-value {
+            color: #28a745;
+            font-weight: bold;
+        }
         .status {
             display: inline-block;
             padding: 8px 15px;
@@ -115,16 +141,6 @@
             </div>
 
             <div class="detail-row">
-                <span class="detail-label">Sender:</span>
-                <span class="detail-value">{{ $sender->name }}</span>
-            </div>
-
-            <div class="detail-row">
-                <span class="detail-label">Receiver:</span>
-                <span class="detail-value">{{ $receiver->name }}</span>
-            </div>
-
-            <div class="detail-row">
                 <span class="detail-label">Status:</span>
                 <div class="status status-{{ strtolower($transfer->status) }}">
                     {{ $transfer->status }}
@@ -132,9 +148,49 @@
             </div>
         </div>
 
+        <div class="financial-summary">
+            <h3 style="margin-top: 0; color: #007bff;">Financial Summary</h3>
+            <div class="financial-row">
+                <span class="financial-label">Base Amount:</span>
+                <span class="financial-value">{{ $amount }} SSP</span>
+            </div>
+            <div class="financial-row">
+                <span class="financial-label">Commission:</span>
+                <span class="financial-value">{{ $commission }} SSP</span>
+            </div>
+            <div class="financial-row">
+                <span class="financial-label">Net Amount:</span>
+                <span class="financial-value">{{ $net_amount }} SSP</span>
+            </div>
+        </div>
+
+        <div class="transfer-details">
+            <h3 style="margin-top: 0; color: #007bff;">Sender Details</h3>
+            <div class="detail-row">
+                <span class="detail-label">Name:</span>
+                <span class="detail-value">{{ $sender->name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Phone:</span>
+                <span class="detail-value">{{ $sender->phone }}</span>
+            </div>
+        </div>
+
+        <div class="transfer-details">
+            <h3 style="margin-top: 0; color: #007bff;">Receiver Details</h3>
+            <div class="detail-row">
+                <span class="detail-label">Name:</span>
+                <span class="detail-value">{{ $receiver->name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Phone:</span>
+                <span class="detail-value">{{ $receiver->phone }}</span>
+            </div>
+        </div>
+
         <div class="footer">
-            <p>This document was automatically generated. Please keep it for your records.</p>
-            <p>{{ config('app.name') }} &copy; {{ date('Y') }}</p>
+            <p>This is an official transfer receipt from AKEC Money Transfer Services.</p>
+            <p>For any inquiries, please contact our support team.</p>
         </div>
     </div>
 </body>
