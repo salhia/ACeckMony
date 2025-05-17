@@ -261,22 +261,37 @@
             }
         });
 
-        // Handle direct verification if transfer data is provided
-        @if(isset($directVerification) && $directVerification)
-            $(document).ready(function() {
-                displayTransfers([{!! json_encode($transfer) !!}]);
-                showStep('transfers');
+        // Add event listener for verify button
+        $(document).ready(function() {
+            $('#verifyPhone').on('click', verifyPhone);
+
+            // Also allow Enter key on phone input
+            $('#phoneNumber').on('keypress', function(e) {
+                if (e.which === 13) {
+                    verifyPhone();
+                }
             });
-        @endif
+
+            // Handle direct verification if transfer data is provided
+            @if(isset($directVerification) && $directVerification)
+                displayTransfers([{!! json_encode($transfer) !!}]);
+                showTransfersStep();
+            @endif
+        });
 
         function showStep(stepId) {
             $('.step').removeClass('active');
-            $(`#step-${stepId}`).addClass('active');
+            $(`#step-${stepId}`).addClass('active animate__fadeIn');
         }
 
         function showPhoneStep() {
             showStep('phone');
             $('#transfers-container').empty();
+            $('#phoneNumber').val('').focus();
+        }
+
+        function showTransfersStep() {
+            showStep('transfers');
         }
 
         function showLoading() {
@@ -299,13 +314,13 @@
             showLoading();
 
             $.ajax({
-                url: '/transfers/verify-phone',
+                url: '{{ route("api.transfers.verify-phone") }}',
                 method: 'POST',
                 data: { phone, type },
                 success: function(response) {
                     if (response.hasTransfers) {
                         displayTransfers(response.transfers, response.type);
-                        showStep('transfers');
+                        showTransfersStep();
                     } else {
                         alert('No transfers found for this phone number');
                     }
@@ -334,21 +349,20 @@
                             </span>
                         </div>
                         <div class="amount-display">
-                            <span class="amount">${transfer.amount}</span>
-                            <span class="currency">SSP</span>
+                            ${transfer.amount} <span class="currency">SSP</span>
                         </div>
                         <div class="financial-details">
                             <div class="financial-item">
                                 <span class="financial-label">Base Amount:</span>
-                                <span class="financial-value amount">${transfer.base_amount}</span>
+                                <span class="financial-value">${transfer.amount} SSP</span>
                             </div>
                             <div class="financial-item">
                                 <span class="financial-label">Commission:</span>
-                                <span class="financial-value commission">${transfer.commission}</span>
+                                <span class="financial-value">${transfer.commission} SSP</span>
                             </div>
                             <div class="financial-item">
                                 <span class="financial-label">Net Amount:</span>
-                                <span class="financial-value net-amount">${transfer.net_amount}</span>
+                                <span class="financial-value">${transfer.net_amount} SSP</span>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -367,7 +381,7 @@
                         </div>
                         <div class="text-center">
                             <a href="${transfer.pdf_url}" class="btn btn-download" target="_blank">
-                                <i class="fas fa-file-pdf me-2"></i>Download PDF
+                                <i class="fas fa-download me-2"></i>Download PDF
                             </a>
                         </div>
                     </div>
