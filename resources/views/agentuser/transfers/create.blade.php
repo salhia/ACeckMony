@@ -1,12 +1,58 @@
 @extends('agentuser.user_dashboard')
 @section('agentuser')
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+
 <div class="page-content">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h3 class="card-title">
-                <i class="fas fa-money-bill-transfer"></i> Money Transfer
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="transfer-container">
+                <div class="card main-card">
+                    <div class="card-header bg-gradient-primary">
+                        <div class="header-content">
+                            <h3 class="card-title mb-0">
+                                <i class="fas fa-money-bill-transfer fa-fw"></i> Quick Money Transfer
             </h3>
+                            <div class="transfer-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span id="currentTime"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Progress Steps -->
+                        <div class="progress-tracker mb-4">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div class="steps d-flex justify-content-between">
+                                <div class="step active">
+                                    <div class="step-circle">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <span class="step-text">State</span>
+                                </div>
+                                <div class="step">
+                                    <div class="step-circle">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <span class="step-text">Sender</span>
+                                </div>
+                                <div class="step">
+                                    <div class="step-circle">
+                                        <i class="fas fa-user-plus"></i>
+                                    </div>
+                                    <span class="step-text">Receiver</span>
+                                </div>
+                                <div class="step">
+                                    <div class="step-circle">
+                                        <i class="fas fa-calculator"></i>
+                                    </div>
+                                    <span class="step-text">Amount</span>
+                                </div>
+                            </div>
         </div>
         <div class="card-body">
             <form id="transferForm" method="POST" action="{{ route('transfers.store') }}">
