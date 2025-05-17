@@ -175,4 +175,19 @@ class TransferVerificationController extends Controller
             ]
         ]);
     }
+
+    public function generateVerificationUrlQr()
+    {
+        // Generate QR code for the verification URL
+        $qrCode = QrCode::size(300)
+            ->gradient(0, 123, 255, 0, 188, 212, 'diagonal')
+            ->style('dot')
+            ->eye('circle')
+            ->format('png')
+            ->generate('https://akec.money/verify');
+
+        return response($qrCode)
+            ->header('Content-Type', 'image/png')
+            ->header('Content-Disposition', 'attachment; filename="akec-money-verify.png"');
+    }
 }

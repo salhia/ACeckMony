@@ -122,6 +122,11 @@
                     <h4 class="mb-0">
                         <i class="fas fa-qrcode me-2"></i>Transfer Verification
                     </h4>
+                    <div class="mt-2">
+                        <a href="{{ route('transfers.verify.qr') }}" class="btn btn-sm btn-outline-light" target="_blank">
+                            <i class="fas fa-download me-1"></i>Download Verification QR
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body p-4">
                     <div class="verification-steps">

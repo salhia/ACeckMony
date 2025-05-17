@@ -279,6 +279,7 @@ Route::post('/profile/update-password', [ProfileController::class, 'updatePasswo
 Route::domain('akec.money')->group(function () {
     // Simple verification URL
     Route::get('/verify', [TransferVerificationController::class, 'showVerificationPage'])->name('transfers.verify');
+    Route::get('/verify/qr', [TransferVerificationController::class, 'generateVerificationUrlQr'])->name('transfers.verify.qr');
 
     // Direct transfer verification with code
     Route::get('/verify/{code}', [TransferVerificationController::class, 'verifyWithCode'])->name('transfers.verify.code');
