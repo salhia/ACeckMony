@@ -28,9 +28,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\TransferVerificationController;
 
-//user Frontend All Route data
-Route::get('/', [AgentDashboardController::class, 'index']);
-
+Route::get('/', [AgentDashboardController::class, 'index'])->middleware('auth');
 Route::get('/clear', function () {
     Artisan::call('view:clear');
     Artisan::call('config:clear');
