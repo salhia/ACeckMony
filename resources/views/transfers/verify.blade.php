@@ -214,12 +214,12 @@
             }
 
             showLoading();
-            const button = $('.btn-verify');
+            const button = $('.btn-primary');
             const originalText = button.html();
             button.html('<i class="fas fa-spinner fa-spin"></i> Verifying...').prop('disabled', true);
 
             $.ajax({
-                url: '/api/transfers/verify-phone',
+                url: '/verify-phone',
                 method: 'POST',
                 data: { phone: phone },
                 success: function(response) {

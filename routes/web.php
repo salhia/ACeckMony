@@ -287,11 +287,9 @@ Route::domain('akec.money')->group(function () {
     Route::get('/transfer/{id}/qr', [TransferVerificationController::class, 'generateQrCode'])->name('transfers.qr-code');
     Route::get('/transfer/{id}/pdf', [TransferVerificationController::class, 'downloadPdf'])->name('transfers.download.pdf');
 
-    // API Routes for Transfer Verification
-    Route::group(['prefix' => 'api'], function () {
-        Route::post('/verify-phone', [TransferVerificationController::class, 'verifyPhone'])->name('api.transfers.verify-phone');
-        Route::post('/verify-qr', [TransferVerificationController::class, 'verifyQrCode'])->name('api.transfers.verify-qr');
-    });
+    // API Routes for Transfer Verification - without api prefix for simplicity
+    Route::post('/verify-phone', [TransferVerificationController::class, 'verifyPhone'])->name('api.transfers.verify-phone');
+    Route::post('/verify-qr', [TransferVerificationController::class, 'verifyQrCode'])->name('api.transfers.verify-qr');
 });
 
 
