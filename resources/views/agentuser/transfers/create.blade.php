@@ -72,13 +72,13 @@
                     <!-- Commission Details -->
                     <div class="commission-details mt-3">
                         <div class="alert alert-info">
-                            <h6><i class="fas fa-calculator"></i> تفاصيل العملية:</h6>
+                            <h6><i class="fas fa-calculator"></i> Transaction Details:</h6>
                             <div class="row mt-2">
                                 <div class="col-md-6">
-                                    <p>المبلغ الأساسي: <span id="baseAmount">0</span></p>
-                                    <p>نسبة العمولة: <span id="commissionRate">{{ auth()->user()->commissionRate ?? 0 }}%</span></p>
-                                    <p>قيمة العمولة: <span id="commissionAmount">0</span></p>
-                                    <p>صافي المبلغ: <span id="netAmount">0</span></p>
+                                    <p>Base Amount: <span id="baseAmount">0</span></p>
+                                    <p>Commission Rate: <span id="commissionRate">{{ auth()->user()->commissionRate ?? 0 }}%</span></p>
+                                    <p>Commission Amount: <span id="commissionAmount">0</span></p>
+                                    <p>Net Amount: <span id="netAmount">0</span></p>
                                 </div>
                             </div>
                         </div>
@@ -281,7 +281,7 @@ function showAlert(message, type) {
     setTimeout(() => alert.alert('close'), 5000);
 }
 
-// حساب العمولة عند تغيير المبلغ
+// Calculate commission when amount changes
 document.getElementById('amount').addEventListener('input', function() {
     calculateCommission();
 });
@@ -290,13 +290,13 @@ function calculateCommission() {
     const amount = parseFloat(document.getElementById('amount').value) || 0;
     const commissionRate = {{ auth()->user()->commissionRate ?? 0 }};
 
-    // حساب العمولة
+    // Calculate commission
     const commission = (amount * commissionRate) / 100;
 
-    // حساب صافي المبلغ
+    // Calculate net amount
     const netAmount = amount - commission;
 
-    // تحديث العرض
+    // Update display
     document.getElementById('baseAmount').textContent = amount.toFixed(2);
     document.getElementById('commissionAmount').textContent = commission.toFixed(2);
     document.getElementById('netAmount').textContent = netAmount.toFixed(2);
