@@ -30,7 +30,7 @@
                 <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button"
                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <img class="wd-30 ht-30 rounded-circle"
-                         src="{{ !empty($user->photo) ? url($imagePath . $user->photo) : url('upload/no_image.jpg') }}"
+                         src="{{ !empty($user->photo) ? asset($imagePath . $user->photo) : asset('upload/no_image.jpg') }}"
                          alt="profile">
                 </a>
                 <div class="dropdown-menu p-0" aria-labelledby="profileDropdown">
