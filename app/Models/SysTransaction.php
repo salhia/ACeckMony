@@ -13,7 +13,8 @@ class SysTransaction extends Model
         'receiver_user_id', 'receiver_customer_id', 'receiver_agent_id',
         'amount', 'commission', 'admin_fee', 'net_amount', 'final_delivered_amount',
         'transaction_type_id', 'delivery_confirmation', 'delivery_proof',
-        'delivery_notes', 'notes', 'status', 'type', 'created_by','region_id'
+        'delivery_notes', 'notes', 'status', 'type', 'created_by','region_id',
+        'agent_id'
     ];
 
     public function senderUser()
@@ -24,6 +25,12 @@ class SysTransaction extends Model
     public function receiverUser()
     {
         return $this->belongsTo(User::class, 'receiver_user_id');
+    }
+
+    // Alias for senderUser to match the view's expectations
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'sender_user_id');
     }
 
     public function senderCustomer()
@@ -47,41 +54,43 @@ class SysTransaction extends Model
     }
 
     public function agent()
-{
-    return $this->belongsTo(User::class, 'sender_agent_id');
-}
+    {
+        return $this->belongsTo(User::class, 'sender_agent_id');
+    }
 
+    public function state()
+    {
+        return $this->belongsTo(SysRegion::class, 'region_id', 'id');
+    }
 
+    public function region()
+    {
+        return $this->belongsTo(SysRegion::class, 'region_id');
+    }
 
+    public function deliveredByUser()
+    {
+        return $this->belongsTo(User::class, 'delivered_by');
+    }
 
-public function state()
-{
-    return $this->belongsTo(SysRegion::class, 'region_id', 'id');
-}
+    public function senderAgent()
+    {
+        return $this->belongsTo(User::class, 'sender_agent_id');
+    }
 
-public function region()
-{
-    return $this->belongsTo(SysRegion::class, 'region_id', 'id');
-}
+    public function senderRegion()
+    {
+        return $this->belongsTo(SysRegion::class, 'sender_region_id');
+    }
 
-public function deliveredByUser()
-{
-    return $this->belongsTo(User::class, 'delivered_by');
-}
+    // Alias for senderRegion to match the view's expectations
+    public function sendRegion()
+    {
+        return $this->belongsTo(SysRegion::class, 'sender_region_id');
+    }
 
-public function senderAgent()
-{
-    return $this->belongsTo(User::class, 'sender_agent_id');
-}
-
-public function senderregion()
-{
-    return $this->belongsTo(User::class, 'sender_region_id');
-}
-
-
-public function receiverAgent()
-{
-    return $this->belongsTo(User::class, 'receiver_agent_id');
-}
+    public function receiverAgent()
+    {
+        return $this->belongsTo(User::class, 'receiver_agent_id');
+    }
 }

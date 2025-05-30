@@ -27,8 +27,12 @@ use App\Http\Controllers\AgentDashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\TransferVerificationController;
+use App\Http\Controllers\AgentReportController;
+use App\Http\Controllers\Admin\AgentPaymentReportController;
+use App\Http\Controllers\AdminFeeController;
+use App\Http\Controllers\Admin\TransactionController;
 
-Route::get('/', [AgentDashboardController::class, 'index'])->middleware('auth');
+//Route::get('/', [AgentDashboardController::class, 'index'])->middleware('auth');
 Route::get('/clear', function () {
     Artisan::call('view:clear');
     Artisan::call('config:clear');
@@ -123,9 +127,7 @@ Route::middleware(['auth', 'roles:admin'])->group(function () {
 
 });
 
-
-
-     }); //End Group Admin Middleware
+ }); //End Group Admin Middleware
 
 
   //Agent Management Group Middleware
@@ -163,7 +165,13 @@ Route::middleware(['auth', 'roles:agent'])->group(function () {
         Route::get('/changeStatus', 'changeStatus');
     });
 
-
+// Agent Reports Routes
+Route::middleware(['auth', 'roles:agent'])->group(function () {
+    Route::get('/agent/reports/office-summary', [AgentReportController::class, 'officeSummary'])->name('agent.office.summary');
+    Route::get('/agent/reports/office-detailed', [AgentReportController::class, 'officeDetailed'])->name('agent.office.detailed');
+    Route::get('/agent/reports/user-transactions', [AgentReportController::class, 'userTransactions'])->name('agent.user.transactions');
+    Route::get('/agent/reports/commission', [AgentReportController::class, 'commissionReport'])->name('agent.commission.report');
+});
 
 
     // Agent Buy Package Route from admin
@@ -291,8 +299,38 @@ Route::domain('akec.money')->group(function () {
     Route::post('/verify-qr', [TransferVerificationController::class, 'verifyQrCode'])->name('api.transfers.verify-qr');
 });
 
+// Admin Fee Routes
+Route::middleware(['auth', 'roles:admin'])->group(function () {
+    // Agent Payments Routes
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/agent-payments', [AdminFeeController::class, 'index'])->name('agent.payments.report');
+        Route::get('/agent-payments/history', [AdminFeeController::class, 'history'])->name('agent.payments.history');
+        Route::post('/transfer-payments', [AdminFeeController::class, 'transferPayments'])->name('transfer.payments');
+        Route::post('/process-payments', [AdminFeeController::class, 'processPayments'])->name('process.payments');
+        Route::post('/update-payment-status/{adminFee}', [AdminFeeController::class, 'updateStatus'])->name('update.payment.status');
+    });
+});
+
+// Agent Payments Routes
+
+
+
 
 
 //????????????????????????????????????????????????؟؟؟؟؟؟؟؟؟؟؟؟؟؟؟؟؟
+
+// Transaction Management Routes
+Route::prefix('admin')->middleware(['auth', 'roles:admin'])->group(function () {
+    Route::get('/transactions', [App\Http\Controllers\Admin\TransactionController::class, 'index'])->name('transaction.history');
+    Route::get('/transactions/{id}', [App\Http\Controllers\Admin\TransactionController::class, 'show'])->name('transaction.details');
+    Route::get('/transactions/{id}/print', [App\Http\Controllers\Admin\TransactionController::class, 'print'])->name('transaction.print');
+    Route::put('/transactions/{id}/status', [App\Http\Controllers\Admin\TransactionController::class, 'updateStatus'])->name('transaction.update-status');
+});
+
+// For admin viewing all agents' transactions
+Route::get('/admin/agents/{agent}/transactions', [AgentReportController::class, 'agentTransactions'])->name('admin.agent.transactions');
+
+// For agent viewing their own transactions
+Route::get('/agent/transactions', [AgentReportController::class, 'myTransactions'])->name('agent.transactions');
 
 

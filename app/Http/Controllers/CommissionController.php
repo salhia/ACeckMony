@@ -34,14 +34,14 @@ class CommissionController extends Controller
 
         $user = Auth::user();
         $amount = $request->amount;
-        $commissionRate = $user->commissionRate ?? 0;
+        $commission_rate = $user->commission_rate ?? 0;
 
-        $commission = ($amount * $commissionRate) / 100;
+        $commission = ($amount * $commission_rate) / 100;
         $netAmount = $amount - $commission;
 
         return response()->json([
             'amount' => number_format($amount, 2),
-            'commissionRate' => $commissionRate,
+            'commission_rate' => $commission_rate,
             'commission' => number_format($commission, 2),
             'netAmount' => number_format($netAmount, 2)
         ]);

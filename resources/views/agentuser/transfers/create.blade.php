@@ -57,6 +57,11 @@
 
                         <form id="transferForm" method="POST" action="{{ route('transfers.store') }}">
                             @csrf
+                            <!-- Hidden fields for calculated amounts -->
+                            <input type="hidden" id="calculated_net_amount" name="amount">
+                            <input type="hidden" id="calculated_commission" name="commission">
+                            <input type="hidden" id="calculated_total" name="total_amount">
+
                             <!-- Multi-step form sections -->
                             <div class="form-sections">
                                 <!-- Step 1: State Selection -->
@@ -152,7 +157,7 @@
                                                 <i class="fas fa-dollar-sign"></i>
                                             </span>
                                             <input type="number" class="form-control form-control-lg border-0 bg-transparent"
-                                                   id="amount" name="amount" required placeholder="Enter amount">
+                                                   id="netAmount" name="amount" required placeholder="Enter net amount to be paid">
                                         </div>
                                     </div>
 
@@ -163,22 +168,22 @@
                                         </div>
                                         <div class="commission-details">
                                             <div class="detail-item">
-                                                <span class="detail-label">Base Amount</span>
-                                                <span class="detail-value" id="baseAmount">0.00</span>
+                                                <span class="detail-label">Net Amount (To be paid)</span>
+                                                <span class="detail-value" id="netAmountDisplay">0.00</span>
                                             </div>
                                             <div class="detail-item">
                                                 <span class="detail-label">Commission Rate</span>
-                                                <span class="detail-value" id="commissionRate">
-                                                    {{ auth()->user()->commissionRate ?? 0 }}%
+                                                <span class="detail-value" id="commission_rate">
+                                                    {{ auth()->user()->commission_rate ?? 0 }}%
                                                 </span>
                                             </div>
                                             <div class="detail-item">
                                                 <span class="detail-label">Commission Amount</span>
-                                                <span class="detail-value" id="commissionAmount">0.00</span>
+                                                <input type="text" class="form-control form-control-sm" id="commissionAmountInput" readonly value="0.00">
                                             </div>
                                             <div class="detail-item total">
-                                                <span class="detail-label">Net Amount</span>
-                                                <span class="detail-value" id="netAmount">0.00</span>
+                                                <span class="detail-label">Total Amount (Including Commission)</span>
+                                                <span class="detail-value" id="totalAmount">0.00</span>
                                             </div>
                                         </div>
                                     </div>
@@ -594,7 +599,6 @@ $(document).ready(function() {
         if (currentStep > 1) {
             const currentSection = $(`.form-section:eq(${currentStep - 1})`);
             const prevSection = $(`.form-section:eq(${currentStep - 2})`);
-
             currentSection.removeClass('animate__fadeIn').addClass('animate__fadeOutRight');
             setTimeout(() => {
                 currentSection.addClass('d-none');
@@ -624,10 +628,8 @@ $(document).ready(function() {
             showAlert('Please enter at least 3 characters', 'warning');
             return;
         }
-
         const searchButton = $(`#search${type}`);
         const resultDiv = $(`#${type.toLowerCase()}Result`);
-
         $.ajax({
             url: "{{ route('customers.search') }}",
             method: 'POST',
@@ -699,22 +701,29 @@ $(document).ready(function() {
 
     // Real-time commission calculation with animation
     let calculateTimeout;
-    $('#amount').on('input', function() {
+    $('#netAmount').on('input', function() {
         clearTimeout(calculateTimeout);
         calculateTimeout = setTimeout(calculateCommission, 300);
     });
 
     function calculateCommission() {
-        const amount = parseFloat($('#amount').val()) || 0;
-        const commissionRate = {{ auth()->user()->commissionRate ?? 0 }};
+        const netAmount = parseFloat($('#netAmount').val()) || 0;
+        const commission_rate = {{ auth()->user()->commission_rate ?? 0 }};
 
-        const commission = (amount * commissionRate) / 100;
-        const netAmount = amount - commission;
+        // Calculate total amount based on net amount
+        const totalAmount = (netAmount * 100) / (100 - commission_rate);
+        // Calculate the commission difference
+        const commission = totalAmount - netAmount;
 
-        // Animate the numbers
-        animateNumber('#baseAmount', amount);
-        animateNumber('#commissionAmount', commission);
-        animateNumber('#netAmount', netAmount);
+        // Update displays
+        animateNumber('#netAmountDisplay', netAmount);
+        $('#commissionAmountInput').val(commission.toFixed(2));
+        animateNumber('#totalAmount', totalAmount);
+
+        // Update hidden fields for form submission
+        $('#calculated_net_amount').val(totalAmount.toFixed(2));
+        $('#calculated_commission').val(commission.toFixed(2));
+        $('#calculated_total').val(totalAmount.toFixed(2));
     }
 
     function animateNumber(selector, value) {
@@ -746,8 +755,18 @@ $(document).ready(function() {
     $('#transferForm').submit(function(e) {
         e.preventDefault();
 
-        if (!$('#sender_id').val() || !$('#receiver_id').val() || !$('#amount').val()) {
+        if (!$('#sender_id').val() || !$('#receiver_id').val() || !$('#netAmount').val()) {
             showAlert('Please complete all required fields', 'warning');
+            return;
+        }
+
+        // Validate amounts
+        const netAmount = parseFloat($('#netAmount').val());
+        const commission = parseFloat($('#commissionAmountInput').val());
+        const total = parseFloat($('#totalAmount').text());
+
+        if (isNaN(netAmount) || isNaN(commission) || isNaN(total)) {
+            showAlert('Invalid amount calculations', 'danger');
             return;
         }
 

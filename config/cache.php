@@ -106,6 +106,15 @@ return [
     |
     */
 
-    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
+    'prefix' => env('CACHE_PREFIX', 'laravel_cache'),
+
+    // Custom cache configurations for reports
+    'report_cache' => [
+        'duration' => [
+            'short' => 30,    // 30 minutes for paginated results
+            'medium' => 60,   // 1 hour for user permissions
+            'long' => 1440,   // 24 hours for static data
+        ],
+    ],
 
 ];

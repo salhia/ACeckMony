@@ -27,35 +27,27 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
+
         $request->session()->regenerate();
 
-        $notification = array();
+        $notification = array(
+            'message' => 'Login Successfully',
+            'alert-type' => 'success'
+        );
 
-        if (Auth::check()) {
-            $user = Auth::user();
-            $notification = [
-                'message' => $user->name . ' تم تسجيل الدخول بنجاح',
-                'alert-type' => 'success'
-            ];
+        if (auth()->user()->role == 'admin') {
 
-            switch($user->role) {
-                case 'admin':
-                    return redirect('/admin/dashboard')->with($notification);
-                case 'agent':
+          //  dd(auth()->user()->role);
+            return redirect()->intended(RouteServiceProvider::ADMIN);
+            //return redirect()->intended('/admin/dashboard')->with($notification);
 
-                    return redirect('/agent/dashboard')->with($notification);
-                case 'user':
-                    return redirect('/user/dashboard')->with($notification);
-                default:
-                    return redirect('/')->with($notification);
-            }
+        } elseif (auth()->user()->role == 'agent') {
+             return redirect()->intended(RouteServiceProvider::AGENT);
+        } elseif (auth()->user()->role == 'user') {
+               return redirect()->intended(RouteServiceProvider::USER);
         }
 
-        $notification = [
-            'message' => 'فشل تسجيل الدخول',
-            'alert-type' => 'error'
-        ];
-        return redirect()->route('login')->with($notification);
+       // return redirect()->intended(RouteServiceProvider::ADMIN);
     }
 
     /**
@@ -74,6 +66,6 @@ class AuthenticatedSessionController extends Controller
         );
 
         // Redirect to login page with notification
-        return redirect('/')->with($notification);
+        return redirect('/login')->with($notification);
     }
 }

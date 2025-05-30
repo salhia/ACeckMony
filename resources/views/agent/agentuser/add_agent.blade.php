@@ -74,7 +74,7 @@
 
     <div class="form-group mb-3">
         <label>Commission Rate (%)</label>
-        <input type="number" step="0.01" name="commissionRate" class="form-control" required>
+        <input type="number" step="0.01" name="commission_rate" class="form-control" required>
     </div>
 
     <div class="form-group mb-3">

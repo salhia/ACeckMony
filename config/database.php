@@ -59,7 +59,10 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_PERSISTENT => true,
+                PDO::ATTR_EMULATE_PREPARES => true,
+                PDO::ATTR_TIMEOUT => 300,
+                PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false,
             ]) : [],
         ],
 

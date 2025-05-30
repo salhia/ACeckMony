@@ -9,7 +9,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h4 class="mb-2">Welcome, {{ Auth::user()->name }}</h4>
+                                <h4 class="mb-2">Welcome, {{ Auth::user()->name }} | Role: {{ auth()->user()->role }}</h4>
                                 <p class="text-muted mb-0">
                                     <i data-feather="map-pin" class="icon-sm me-2"></i>
                                     Region: {{ $stats['region']['name'] ?? 'Not Specified' }}

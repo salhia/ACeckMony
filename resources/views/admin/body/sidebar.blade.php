@@ -48,13 +48,13 @@
                 <div class="collapse" id="financialTransactions">
                     <ul class="nav sub-menu">
                         <li class="nav-item">
-                            <a href="#" class="nav-link">Transaction History</a>
+                            <a href="{{ route('transaction.history') }}" class="nav-link">Transaction History</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">Pending Transactions</a>
+                            <a href="{{ route('transaction.details', ['id' => 1]) }}" class="nav-link">Transaction Details</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">Account Movements</a>
+                            <a href="{{ route('transaction.print', ['id' => 1]) }}" class="nav-link">Print Receipt</a>
                         </li>
                     </ul>
                 </div>
@@ -99,6 +99,9 @@
                         </li>
                         <li class="nav-item">
                             <a href="#" class="nav-link">Financial Reports</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.agent.payments.report') }}" class="nav-link">Agent Payment Report</a>
                         </li>
                     </ul>
                 </div>

@@ -18,9 +18,29 @@ class RouteServiceProvider extends ServiceProvider
      * @var string
      */
     //public const HOME = '/dashboard';
-    public const AGENT = 'agent/dashboard';
-    public const USER = 'useragent/dashboard';
+    public const ADMIN = '/admin/dashboard';
+    public const AGENT = '/agent/dashboard';
+    public const USER = '/user/dashboard';
 
+    /**
+     * Get the home route based on user role
+     */
+    public static function getHomeRoute()
+    {
+        if (auth()->check()) {
+            $user = auth()->user();
+
+            if ($user->role == 'admin') {
+                return self::ADMIN;
+            } elseif ($user->role == 'agent') {
+                return self::AGENT;
+            } elseif ($user->role == 'user') {
+                return self::USER;
+            }
+        }
+
+      //  return self::HOME;
+    }
 
     /**
      * Define your route model bindings, pattern filters, and other route configuration.

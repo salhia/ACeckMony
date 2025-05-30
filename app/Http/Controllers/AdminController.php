@@ -34,7 +34,7 @@ class AdminController extends Controller
             'alert-type' => 'success'
         );
 
-        return redirect('/admin/login')->with($notification);
+        return redirect('/login')->with($notification);
     } // End Method
 
     public function AdminLogin()
@@ -139,6 +139,7 @@ class AdminController extends Controller
             'address' => 'required|string|max:255',
             'password' => 'required|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'commission_rate' => 'nullable|numeric|min:0',
         ]);
 
         // Initialize $save_url variable
@@ -147,17 +148,13 @@ class AdminController extends Controller
         // Check if a photo file is uploaded
         if ($request->hasFile('photo')) {
             $file = $request->file('photo');
-
             // Generate a unique filename with the original extension
             $filename = hexdec(uniqid()) . '.' . $file->getClientOriginalExtension();
-
             // Move the uploaded file to the desired directory
             $file->move(public_path('upload/agent_images'), $filename);
-
             // Set the save URL to store in the database
             $save_url = 'upload/agent_images/' . $filename;
         }
-
         // Create a new agent record
         User::create([
             'name' => $request->name,
@@ -168,18 +165,16 @@ class AdminController extends Controller
             'password' => Hash::make($request->password),
             'status' => 'active',
             'role' => 'agent',
+            'commission_rate' => $request->commission_rate,
         ]);
-
         // Prepare a success notification
         $notification = array(
             'message' => 'Agent Successfully Created',
             'alert-type' => 'success'
         );
-
         // Redirect to the agents list page with notification
         return redirect()->route('all.superagent')->with($notification);
     }
-
 
     public function EditAgent($id)
     {
@@ -216,6 +211,7 @@ class AdminController extends Controller
         $user->email = $request->email;
         $user->phone = $request->phone;
         $user->address = $request->address;
+        $user->commission_rate = $request->commission_rate;
         $user->updated_at = Carbon::now();
 
         // Save the changes to the database

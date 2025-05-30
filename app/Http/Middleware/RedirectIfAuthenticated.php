@@ -31,8 +31,7 @@ class RedirectIfAuthenticated
                         return redirect('/agent/dashboard');
                     case 'user':
                         return redirect('/user/dashboard');
-                    default:
-                        return redirect('/');
+
                 }
             }
         }

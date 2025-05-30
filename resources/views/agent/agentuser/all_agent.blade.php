@@ -50,7 +50,7 @@
 
 
                                            <td>{{ $item->region->name ?? 'No Region' }}</td>
-                                           <td>{{ $item->commissionRate ?? '-' }}</td>
+                                           <td>{{ $item->commission_rate ?? '-' }}</td>
                                            <td>{{ number_format($item->transfer_limit, 2) ?? '-' }}</td>
                                            <td>{{ $item->parentAgent->name ?? '-' }}</td>
                                             <td>

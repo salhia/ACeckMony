@@ -39,6 +39,11 @@
                                         value="{{ $allagent->address }}">
                                 </div>
 
+                                <div class="form-group mb-3">
+                                    <label for="commission_rate" class="form-label">Commission Rate (%)</label>
+                                    <input type="number" step="0.01" name="commission_rate" class="form-control" value="{{ old('commission_rate', $allagent->commission_rate ?? '') }}">
+                                </div>
+
                                 <div class="mb-3">
                                     <label class="form-label" for="formFile">Upload Photo</label>
                                     <input class="form-control" name="photo" type="file" id="image">

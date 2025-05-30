@@ -64,6 +64,11 @@
                                     <img src="" id="agentImg" style="display: none; width: 80px; height: 80px;">
                                 </div>
 
+                                <div class="form-group mb-3">
+                                    <label for="commission_rate" class="form-label">Commission Rate (%)</label>
+                                    <input type="number" step="0.01" name="commission_rate" class="form-control" value="{{ old('commission_rate') }}">
+                                </div>
+
                                 <button type="submit" class="btn btn-primary me-2">Save Changes</button>
                             </form>
                         </div>

@@ -23,7 +23,7 @@
                             <div class="row mt-3">
                                 <div class="col-md-6">
                                     <p>المبلغ الأساسي: <span id="baseAmount">0</span></p>
-                                    <p>نسبة العمولة: <span id="commissionRate">{{ auth()->user()->commissionRate ?? 0 }}%</span></p>
+                                    <p>نسبة العمولة: <span id="commission_rate">{{ auth()->user()->commission_rate ?? 0 }}%</span></p>
                                     <p>قيمة العمولة: <span id="commissionAmount">0</span></p>
                                     <p>صافي المبلغ: <span id="netAmount">0</span></p>
                                 </div>
@@ -44,10 +44,10 @@ document.getElementById('amount').addEventListener('input', function() {
 
 function calculateCommission() {
     const amount = parseFloat(document.getElementById('amount').value) || 0;
-    const commissionRate = {{ auth()->user()->commissionRate ?? 0 }};
+    const commission_rate = {{ auth()->user()->commission_rate ?? 0 }};
 
     // حساب العمولة
-    const commission = (amount * commissionRate) / 100;
+    const commission = (amount * commission_rate) / 100;
 
     // حساب صافي المبلغ
     const netAmount = amount - commission;

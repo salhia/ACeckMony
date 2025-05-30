@@ -8,8 +8,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Traits\HasPermissions;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -40,9 +42,23 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'commission_rate' => 'decimal:2'
     ];
 
-
+    protected $fillable = [
+        'name',
+        'email',
+        'username',
+        'password',
+        'phone',
+        'address',
+        'photo',
+        'role',
+        'status',
+        'commission_rate',
+        'region_id',
+        'parent_agent_id'
+    ];
 
     public function getpermissionGroups()
     {
@@ -69,16 +85,42 @@ class User extends Authenticatable
         return $hasPermission;
     }
 
-    public function region()
-{
-    return $this->belongsTo(SysRegion::class, 'region_id'); // أو 'region_id' حسب اسم العمود
-}
+    public function region(): BelongsTo
+    {
+        return $this->belongsTo(SysRegion::class, 'region_id');
+    }
 
+    public function parentAgent(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'parent_agent_id');
+    }
 
+    public function subAgents()
+    {
+        return $this->hasMany(User::class, 'parent_agent_id');
+    }
 
-public function parentAgent() {
-    return $this->belongsTo(User::class, 'parent_agent_id');
-}
+    public function sentTransactions()
+    {
+        return $this->hasMany(SysTransaction::class, 'sender_user_id');
+    }
 
+    public function receivedTransactions()
+    {
+        return $this->hasMany(SysTransaction::class, 'receiver_user_id');
+    }
+
+    public function agentTransactions()
+    {
+        return $this->hasMany(SysTransaction::class, 'sender_agent_id');
+    }
+
+    /**
+     * Check if user has a specific role
+     */
+    public function hasRole($role)
+    {
+        return $this->role === $role;
+    }
 
 }

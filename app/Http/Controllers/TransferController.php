@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Models\SysTransaction;
+use App\Models\User;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -113,55 +114,80 @@ public function applyDiscount(Request $request)
 
    public function store(Request $request)
 {
-    $user = auth()->user();
-    $agent_id = $user->id;
-    $region_id = $user->region_id;
+    Log::info('TransferController@store: started', ['request' => $request->all()]);
 
-    // التحقق من صحة البيانات
     $validated = $request->validate([
         'sender_id' => 'required',
         'receiver_id' => 'required',
         'amount' => 'required|numeric|min:0',
+        'commission' => 'required|numeric|min:0',
         'region_id' => 'required|exists:sys_regions,id',
     ]);
+    Log::info('TransferController@store: after validation', ['validated' => $validated]);
 
-    // التحقق من عدم تطابق المرسل والمستلم
+    $user = auth()->user();
+    Log::info('TransferController@store: user found', ['user' => $user]);
+
+    $agent = null;
+    $adminFee = 0;
+
+    if ($user && $user->parent_agent_id) {
+
+        $agent = User::find($user->parent_agent_id);
+    }
+
+    if (!$agent) {
+        Log::error('TransferController@store: No agent found for user', ['user_id' => $user->id]);
+        return redirect()->back()
+            ->withInput()
+            ->withErrors(['error' => 'No agent is associated with this user. Transfer cannot be completed.']);
+    }
+
+    $commission_rate = $agent->commission_rate ?? 0;
+
+
     if ($validated['sender_id'] == $validated['receiver_id']) {
+        Log::warning('TransferController@store: sender and receiver are the same');
         return redirect()->back()
             ->withInput()
             ->withErrors(['error' => 'لا يمكن أن يكون المرسل والمستلم نفس الشخص']);
     }
 
     try {
-        // حساب العمولة
-        $commissionRate = $user->commissionRate ?? 0.01;
-        $commission = ($validated['amount'] * $commissionRate) / 100;
-        $adminFee = 0;
-        $netAmount = $validated['amount'] - $commission - $adminFee;
-        $finalDeliveredAmount = $netAmount;
+        $commission = $validated['commission'];
+        $amount = $validated['amount'] + $commission;
+         $adminFee = ($amount * $commission_rate) / 100;
+        $netAmount = $validated['amount'];
+        $finalDeliveredAmount = $validated['amount'];
 
-        // إنشاء كود فريد للعملية
+        Log::info('TransferController@store: calculated values', [
+            'commission' => $commission,
+            'amount' => $amount,
+            'adminFee' => $adminFee,
+            'agent_id' => $agent ? $agent->id : null,
+        ]);
+
         $transactionCode = 'TRX-' . strtoupper(uniqid());
 
-        // إنشاء سجل التحويل
         $transaction = SysTransaction::create([
             'transaction_code' => $transactionCode,
             'sender_customer_id' => $validated['sender_id'],
             'receiver_customer_id' => $validated['receiver_id'],
 
             // معلومات المرسل
-            'sender_user_id' => $agent_id,
-            'sender_agent_id' => $agent_id,
-            'sender_region_id' => $region_id,
+            'sender_user_id' => $validated['sender_id'],
+            'sender_agent_id' => $validated['sender_id'],
+            'sender_region_id' => $validated['region_id'],
 
             // معلومات المستلم
             'region_id' => $validated['region_id'],
             'receiver_agent_id' => null, // سيتم تحديده عند الاستلام
 
             // المبالغ والعمولات
-            'amount' => $validated['amount'],
+            'amount' => $amount,
             'commission' => $commission,
             'admin_fee' => $adminFee,
+            'agent_id' => $agent->id,
             'net_amount' => $netAmount,
             'final_delivered_amount' => $finalDeliveredAmount,
 
@@ -169,14 +195,16 @@ public function applyDiscount(Request $request)
             'transaction_type_id' => 1,
             'status' => 'completed',
             'notes' => $request->input('notes'),
-            'created_by' => $agent_id
+            'created_by' => $validated['sender_id']
         ]);
+
+        Log::info('TransferController@store: transaction created', ['transaction_id' => $transaction->id]);
 
         return redirect()->route('transfers.show', $transaction->id)
             ->with('success', 'تمت عملية التحويل بنجاح. رقم العملية: ' . $transactionCode);
 
     } catch (\Exception $e) {
-        Log::error('Transfer Error: ' . $e->getMessage());
+        Log::error('TransferController@store: Exception', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
         return redirect()->back()
             ->withInput()
             ->withErrors(['error' => 'حدث خطأ أثناء معالجة التحويل: ' . $e->getMessage()]);

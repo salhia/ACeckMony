@@ -29,6 +29,7 @@
                                         <th>Name </th>
                                         <th>Role </th>
                                         <th>Status </th>
+                                        <th>Commission Rate</th>
                                         <th>Action </th>
                                     </tr>
                                 </thead>
@@ -45,6 +46,8 @@
                                                 <span
                                                     class="badge rounded-pill {{ $item->status == 'active' ? 'bg-success' : 'bg-danger' }}">{{ $item->status }}</span>
                                             </td>
+
+                                            <td>{{ $item->commission_rate }}%</td>
 
                                             {{-- <td>
                                                 <input data-id="{{ $item->id }}" class="toggle-class" type="checkbox"
