@@ -31,8 +31,10 @@ use App\Http\Controllers\AgentReportController;
 use App\Http\Controllers\Admin\AgentPaymentReportController;
 use App\Http\Controllers\AdminFeeController;
 use App\Http\Controllers\Admin\TransactionController;
+use App\Http\Controllers\HomeController;
 
-//Route::get('/', [AgentDashboardController::class, 'index'])->middleware('auth');
+
+Route::get('/', [HomeController::class, 'homeRedirect'])->middleware('auth');
 Route::get('/clear', function () {
     Artisan::call('view:clear');
     Artisan::call('config:clear');
