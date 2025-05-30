@@ -82,15 +82,6 @@
         <input type="number" name="transfer_limit" class="form-control" required>
     </div>
 
-    <div class="form-group mb-3">
-        <label>Parent Agent (Optional)</label>
-        <select name="parent_agent_id" class="form-control">
-
-            @foreach($agents as $agent)
-                <option value="{{ $agent->id }}">{{ $agent->name }}</option>
-            @endforeach
-        </select>
-    </div>
 
     <div class="form-group mb-3">
         <label>Agent Image</label>

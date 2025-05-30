@@ -1,360 +1,333 @@
 @extends('agent.agent_dashboard')
 @section('agent')
 
-@php
-    $id = Auth::user()->id;
-    $agentId = App\Models\User::find($id);
-    $status = $agentId->status;
-@endphp
-
 <div class="page-content">
+    @if(isset($stats))
+        <!-- Date Range Selection -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="GET" action="{{ route('agent.dashboard') }}" class="row align-items-end">
+                            <div class="col-md-4">
+                                <label for="start_date" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date"
+                                    value="{{ $stats['date_range']['start'] }}" max="{{ date('Y-m-d') }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="end_date" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="end_date" name="end_date"
+                                    value="{{ $stats['date_range']['end'] }}" max="{{ date('Y-m-d') }}">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i data-feather="filter" class="icon-sm me-2"></i>
+                                    Filter Data
+                                </button>
+                                <a href="{{ route('agent.dashboard') }}" class="btn btn-secondary">
+                                    <i data-feather="refresh-cw" class="icon-sm me-2"></i>
+                                    Reset
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    @if ($status == 'active')
-    <h4>Agent Account is <span class="text-success">Active</span></h4>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-2">Welcome, {{ Auth::user()->name }} | Role: {{ auth()->user()->role }}</h4>
 
+                                <p class="text-muted mb-0">
+                                    <i data-feather="users" class="icon-sm me-2"></i>
+                                    Total Registered Users: {{ $stats['total_users'] }}
+                                </p>
+                                <p class="text-muted mb-0">
+                                    <i data-feather="calendar" class="icon-sm me-2"></i>
+                                    Period: {{ $stats['date_range']['start'] }} to {{ $stats['date_range']['end'] }}
+                                </p>
+                            </div>
+                            <div>
+                                <a href="{{ route('agent.reports') }}" class="btn btn-primary">
+                                    <i data-feather="file-text" class="icon-sm me-2"></i>
+                                    View Detailed Reports
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Statistics -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h5>Total Statistics</h5>
+            </div>
+
+            @foreach(['sent', 'received', 'commission', 'transactions'] as $stat)
+                <div class="col-md-3 grid-margin stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title mb-0">{{ $stats['region'][$stat]['label'] ?? '' }}</h6>
+                            <div class="row">
+                                <div class="col-12">
+                                    <h3 class="mb-2">{{ number_format($stats['region'][$stat]['total'] ?? 0, 2) }}</h3>
+                                    <div class="d-flex align-items-baseline">
+                                        <p class="text-success">
+                                            <span>Today: {{ number_format($stats['region'][$stat]['today'] ?? 0, 2) }}</span>
+                                            <i data-feather="arrow-up" class="icon-sm mb-1"></i>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        <!-- Top Comparisons -->
+        <div class="row mb-4">
+            <!-- Top States -->
+            <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Top States by Amount</h6>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>State</th>
+                                        <th>Amount</th>
+                                        <th>Transactions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($stats['region']['top_states'] as $state)
+                                        <tr>
+                                            <td>{{ $state['name'] }}</td>
+                                            <td>{{ number_format($state['total_amount'], 2) }}</td>
+                                            <td>{{ $state['total_transactions'] }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Users -->
+            <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Top Users by Amount</h6>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Amount</th>
+                                        <th>Transactions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($stats['region']['top_users'] as $user)
+                                        <tr>
+                                            <td>{{ $user['name'] }}</td>
+                                            <td>{{ number_format($user['total_amount'], 2) }}</td>
+                                            <td>{{ $user['total_transactions'] }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- State-wise Statistics -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">State-wise Statistics</h6>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>State</th>
+                                        <th>Total Amount</th>
+                                        <th>Transactions</th>
+                                        <th>Commission</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($stats['region']['state_stats'] as $state)
+                                        <tr>
+                                            <td>{{ $state['name'] }}</td>
+                                            <td>{{ number_format($state['total_amount'], 2) }}</td>
+                                            <td>{{ $state['total_transactions'] }}</td>
+                                            <td>{{ number_format($state['total_commission'], 2) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User-wise Statistics -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">User-wise Statistics</h6>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Total Amount</th>
+                                        <th>Transactions</th>
+                                        <th>Commission</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($stats['region']['user_stats'] as $user)
+                                        <tr>
+                                            <td>{{ $user['name'] }}</td>
+                                            <td>{{ number_format($user['total_amount'], 2) }}</td>
+                                            <td>{{ $user['total_transactions'] }}</td>
+                                            <td>{{ number_format($user['total_commission'], 2) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Chart -->
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Transactions Analysis (Last 7 Days)</h6>
+                        <div id="transactionsChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     @else
-    <h4>Agent Account is <span class="text-danger">Inactive</span></h4>
-    <p class="text-danger"><b> Plz wait admin will check and approve your account</b></p>
+        <div class="alert alert-warning">
+            <i data-feather="alert-triangle" class="icon-sm me-2"></i>
+            No data available at the moment
+        </div>
     @endif
-
-    <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
-      <div>
-        <h4 class="mb-3 mb-md-0">Welcome to Dashboard</h4>
-      </div>
-      <div class="d-flex align-items-center flex-wrap text-nowrap">
-        <div class="input-group flatpickr wd-200 me-2 mb-2 mb-md-0" id="dashboardDate">
-          <span class="input-group-text input-group-addon bg-transparent border-primary" data-toggle><i data-feather="calendar" class="text-primary"></i></span>
-          <input type="text" class="form-control bg-transparent border-primary" placeholder="Select date" data-input>
-        </div>
-        <button type="button" class="btn btn-outline-primary btn-icon-text me-2 mb-2 mb-md-0">
-          <i class="btn-icon-prepend" data-feather="printer"></i>
-          Print
-        </button>
-        <button type="button" class="btn btn-primary btn-icon-text mb-2 mb-md-0">
-          <i class="btn-icon-prepend" data-feather="download-cloud"></i>
-          Download Report
-        </button>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-12 col-xl-12 stretch-card">
-        <div class="row flex-grow-1">
-          <div class="col-md-4 grid-margin stretch-card">
-            <div class="card">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-baseline">
-                  <h6 class="card-title mb-0">New Customers</h6>
-                  <div class="dropdown mb-2">
-                    <a type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="eye" class="icon-sm me-2"></i> <span class="">View</span></a>
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="edit-2" class="icon-sm me-2"></i> <span class="">Edit</span></a>
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="trash" class="icon-sm me-2"></i> <span class="">Delete</span></a>
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="printer" class="icon-sm me-2"></i> <span class="">Print</span></a>
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="download" class="icon-sm me-2"></i> <span class="">Download</span></a>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-6 col-md-12 col-xl-5">
-                    <h3 class="mb-2">3,897</h3>
-                    <div class="d-flex align-items-baseline">
-                      <p class="text-success">
-                        <span>+3.3%</span>
-                        <i data-feather="arrow-up" class="icon-sm mb-1"></i>
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-6 col-md-12 col-xl-7">
-                    <div id="customersChart" class="mt-md-3 mt-xl-0"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4 grid-margin stretch-card">
-            <div class="card">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-baseline">
-                  <h6 class="card-title mb-0">New Orders</h6>
-                  <div class="dropdown mb-2">
-                    <a type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="eye" class="icon-sm me-2"></i> <span class="">View</span></a>
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="edit-2" class="icon-sm me-2"></i> <span class="">Edit</span></a>
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="trash" class="icon-sm me-2"></i> <span class="">Delete</span></a>
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="printer" class="icon-sm me-2"></i> <span class="">Print</span></a>
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="download" class="icon-sm me-2"></i> <span class="">Download</span></a>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-6 col-md-12 col-xl-5">
-                    <h3 class="mb-2">35,084</h3>
-                    <div class="d-flex align-items-baseline">
-                      <p class="text-danger">
-                        <span>-2.8%</span>
-                        <i data-feather="arrow-down" class="icon-sm mb-1"></i>
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-6 col-md-12 col-xl-7">
-                    <div id="ordersChart" class="mt-md-3 mt-xl-0"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4 grid-margin stretch-card">
-            <div class="card">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-baseline">
-                  <h6 class="card-title mb-0">Growth</h6>
-                  <div class="dropdown mb-2">
-                    <a type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="eye" class="icon-sm me-2"></i> <span class="">View</span></a>
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="edit-2" class="icon-sm me-2"></i> <span class="">Edit</span></a>
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="trash" class="icon-sm me-2"></i> <span class="">Delete</span></a>
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="printer" class="icon-sm me-2"></i> <span class="">Print</span></a>
-                      <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="download" class="icon-sm me-2"></i> <span class="">Download</span></a>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-6 col-md-12 col-xl-5">
-                    <h3 class="mb-2">89.87%</h3>
-                    <div class="d-flex align-items-baseline">
-                      <p class="text-success">
-                        <span>+2.8%</span>
-                        <i data-feather="arrow-up" class="icon-sm mb-1"></i>
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-6 col-md-12 col-xl-7">
-                    <div id="growthChart" class="mt-md-3 mt-xl-0"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> <!-- row -->
-
-    <div class="row">
-      <div class="col-lg-7 col-xl-12 grid-margin stretch-card">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-baseline mb-2">
-              <h6 class="card-title mb-0">Monthly sales</h6>
-              <div class="dropdown mb-2">
-                <a type="button" id="dropdownMenuButton4" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
-                </a>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton4">
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="eye" class="icon-sm me-2"></i> <span class="">View</span></a>
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="edit-2" class="icon-sm me-2"></i> <span class="">Edit</span></a>
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="trash" class="icon-sm me-2"></i> <span class="">Delete</span></a>
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="printer" class="icon-sm me-2"></i> <span class="">Print</span></a>
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="download" class="icon-sm me-2"></i> <span class="">Download</span></a>
-                </div>
-              </div>
-            </div>
-            <p class="text-muted">Sales are activities related to selling or the number of goods or services sold in a given time period.</p>
-            <div id="monthlySalesChart"></div>
-          </div>
-        </div>
-      </div>
-    </div> <!-- row -->
-
-    <div class="row">
-      <div class="col-lg-5 col-xl-4 grid-margin grid-margin-xl-0 stretch-card">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-baseline mb-2">
-              <h6 class="card-title mb-0">Inbox</h6>
-              <div class="dropdown mb-2">
-                <a type="button" id="dropdownMenuButton6" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
-                </a>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton6">
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="eye" class="icon-sm me-2"></i> <span class="">View</span></a>
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="edit-2" class="icon-sm me-2"></i> <span class="">Edit</span></a>
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="trash" class="icon-sm me-2"></i> <span class="">Delete</span></a>
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="printer" class="icon-sm me-2"></i> <span class="">Print</span></a>
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="download" class="icon-sm me-2"></i> <span class="">Download</span></a>
-                </div>
-              </div>
-            </div>
-            <div class="d-flex flex-column">
-              <a href="javascript:;" class="d-flex align-items-center border-bottom pb-3">
-                <div class="me-3">
-                  <img src="https://via.placeholder.com/35x35" class="rounded-circle wd-35" alt="user">
-                </div>
-                <div class="w-100">
-                  <div class="d-flex justify-content-between">
-                    <h6 class="text-body mb-2">Leonardo Payne</h6>
-                    <p class="text-muted tx-12">12.30 PM</p>
-                  </div>
-                  <p class="text-muted tx-13">Hey! there I'm available...</p>
-                </div>
-              </a>
-              <a href="javascript:;" class="d-flex align-items-center border-bottom py-3">
-                <div class="me-3">
-                  <img src="https://via.placeholder.com/35x35" class="rounded-circle wd-35" alt="user">
-                </div>
-                <div class="w-100">
-                  <div class="d-flex justify-content-between">
-                    <h6 class="text-body mb-2">Carl Henson</h6>
-                    <p class="text-muted tx-12">02.14 AM</p>
-                  </div>
-                  <p class="text-muted tx-13">I've finished it! See you so..</p>
-                </div>
-              </a>
-              <a href="javascript:;" class="d-flex align-items-center border-bottom py-3">
-                <div class="me-3">
-                  <img src="https://via.placeholder.com/35x35" class="rounded-circle wd-35" alt="user">
-                </div>
-                <div class="w-100">
-                  <div class="d-flex justify-content-between">
-                    <h6 class="text-body mb-2">Jensen Combs</h6>
-                    <p class="text-muted tx-12">08.22 PM</p>
-                  </div>
-                  <p class="text-muted tx-13">This template is awesome!</p>
-                </div>
-              </a>
-              <a href="javascript:;" class="d-flex align-items-center border-bottom py-3">
-                <div class="me-3">
-                  <img src="https://via.placeholder.com/35x35" class="rounded-circle wd-35" alt="user">
-                </div>
-                <div class="w-100">
-                  <div class="d-flex justify-content-between">
-                    <h6 class="text-body mb-2">Amiah Burton</h6>
-                    <p class="text-muted tx-12">05.49 AM</p>
-                  </div>
-                  <p class="text-muted tx-13">Nice to meet you</p>
-                </div>
-              </a>
-              <a href="javascript:;" class="d-flex align-items-center border-bottom py-3">
-                <div class="me-3">
-                  <img src="https://via.placeholder.com/35x35" class="rounded-circle wd-35" alt="user">
-                </div>
-                <div class="w-100">
-                  <div class="d-flex justify-content-between">
-                    <h6 class="text-body mb-2">Yaretzi Mayo</h6>
-                    <p class="text-muted tx-12">01.19 AM</p>
-                  </div>
-                  <p class="text-muted tx-13">Hey! there I'm available...</p>
-                </div>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-7 col-xl-8 stretch-card">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-baseline mb-2">
-              <h6 class="card-title mb-0">Projects</h6>
-              <div class="dropdown mb-2">
-                <a type="button" id="dropdownMenuButton7" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
-                </a>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton7">
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="eye" class="icon-sm me-2"></i> <span class="">View</span></a>
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="edit-2" class="icon-sm me-2"></i> <span class="">Edit</span></a>
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="trash" class="icon-sm me-2"></i> <span class="">Delete</span></a>
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="printer" class="icon-sm me-2"></i> <span class="">Print</span></a>
-                  <a class="dropdown-item d-flex align-items-center" href="javascript:;"><i data-feather="download" class="icon-sm me-2"></i> <span class="">Download</span></a>
-                </div>
-              </div>
-            </div>
-            <div class="table-responsive">
-              <table class="table table-hover mb-0">
-                <thead>
-                  <tr>
-                    <th class="pt-0">#</th>
-                    <th class="pt-0">Project Name</th>
-                    <th class="pt-0">Start Date</th>
-                    <th class="pt-0">Due Date</th>
-                    <th class="pt-0">Status</th>
-                    <th class="pt-0">Assign</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>1</td>
-                    <td>NobleUI jQuery</td>
-                    <td>01/01/2022</td>
-                    <td>26/04/2022</td>
-                    <td><span class="badge bg-danger">Released</span></td>
-                    <td>Leonardo Payne</td>
-                  </tr>
-                  <tr>
-                    <td>2</td>
-                    <td>NobleUI Angular</td>
-                    <td>01/01/2022</td>
-                    <td>26/04/2022</td>
-                    <td><span class="badge bg-success">Review</span></td>
-                    <td>Carl Henson</td>
-                  </tr>
-                  <tr>
-                    <td>3</td>
-                    <td>NobleUI ReactJs</td>
-                    <td>01/05/2022</td>
-                    <td>10/09/2022</td>
-                    <td><span class="badge bg-info">Pending</span></td>
-                    <td>Jensen Combs</td>
-                  </tr>
-                  <tr>
-                    <td>4</td>
-                    <td>NobleUI VueJs</td>
-                    <td>01/01/2022</td>
-                    <td>31/11/2022</td>
-                    <td><span class="badge bg-warning">Work in Progress</span>
-                    </td>
-                    <td>Amiah Burton</td>
-                  </tr>
-                  <tr>
-                    <td>5</td>
-                    <td>NobleUI Laravel</td>
-                    <td>01/01/2022</td>
-                    <td>31/12/2022</td>
-                    <td><span class="badge bg-danger">Coming soon</span></td>
-                    <td>Yaretzi Mayo</td>
-                  </tr>
-                  <tr>
-                    <td>6</td>
-                    <td>NobleUI NodeJs</td>
-                    <td>01/01/2022</td>
-                    <td>31/12/2022</td>
-                    <td><span class="badge bg-primary">Coming soon</span></td>
-                    <td>Carl Henson</td>
-                  </tr>
-                  <tr>
-                    <td class="border-bottom">3</td>
-                    <td class="border-bottom">NobleUI EmberJs</td>
-                    <td class="border-bottom">01/05/2022</td>
-                    <td class="border-bottom">10/11/2022</td>
-                    <td class="border-bottom"><span class="badge bg-info">Pending</span></td>
-                    <td class="border-bottom">Jensen Combs</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> <!-- row -->
-
-        </div>
+</div>
 
 @endsection
+
+@push('scripts')
+<script>
+$(function() {
+    // Date range validation
+    $('#start_date, #end_date').on('change', function() {
+        var startDate = $('#start_date').val();
+        var endDate = $('#end_date').val();
+
+        if (startDate && endDate) {
+            if (startDate > endDate) {
+                alert('Start date cannot be greater than end date');
+                $(this).val('');
+            }
+        }
+    });
+
+    // Initialize Chart
+    var options = {
+        chart: {
+            type: 'area',
+            height: 350,
+            fontFamily: 'Arial, sans-serif',
+            toolbar: {
+                show: true
+            }
+        },
+        series: [{
+            name: 'Sent Amount',
+            data: {!! json_encode($stats['region']['chart_data']['sent'] ?? []) !!}
+        }, {
+            name: 'Received Amount',
+            data: {!! json_encode($stats['region']['chart_data']['received'] ?? []) !!}
+        }],
+        xaxis: {
+            categories: {!! json_encode($stats['region']['chart_data']['dates'] ?? []) !!},
+            labels: {
+                rotate: -45,
+                style: {
+                    fontSize: '12px'
+                }
+            }
+        },
+        yaxis: {
+            labels: {
+                formatter: function(value) {
+                    return new Intl.NumberFormat('en-US').format(value);
+                }
+            }
+        },
+        tooltip: {
+            y: {
+                formatter: function(value) {
+                    return new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD'
+                    }).format(value);
+                }
+            }
+        },
+        colors: ['#4CAF50', '#2196F3'],
+        stroke: {
+            curve: 'smooth',
+            width: 2
+        },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.7,
+                opacityTo: 0.3
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        grid: {
+            borderColor: '#f1f1f1',
+            row: {
+                colors: ['transparent', 'transparent']
+            }
+        },
+        markers: {
+            size: 4
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#transactionsChart"), options);
+    chart.render();
+});
+</script>
+@endpush

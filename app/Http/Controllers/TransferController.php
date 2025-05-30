@@ -175,9 +175,9 @@ public function applyDiscount(Request $request)
             'receiver_customer_id' => $validated['receiver_id'],
 
             // معلومات المرسل
-            'sender_user_id' => $validated['sender_id'],
-            'sender_agent_id' => $validated['sender_id'],
-            'sender_region_id' => $validated['region_id'],
+            'sender_user_id' => $user->id,
+            'sender_agent_id' => $agent->id,
+            'sender_region_id' => $user->region_id,
 
             // معلومات المستلم
             'region_id' => $validated['region_id'],

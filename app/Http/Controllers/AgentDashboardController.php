@@ -10,7 +10,6 @@ use App\Models\User;
 use App\Models\SysRegion;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use App\Models\SysTransactionType;
 
 class AgentDashboardController extends Controller
 {
@@ -158,7 +157,6 @@ class AgentDashboardController extends Controller
             ->with([
                 'senderCustomer',
                 'receiverCustomer',
-                'transactionType',
                 'senderAgent',
                 'senderregion' // Add new relationship
             ])
@@ -175,7 +173,6 @@ class AgentDashboardController extends Controller
             ->with([
                 'senderCustomer',
                 'receiverCustomer',
-                'transactionType',
                 'senderAgent',
                 'senderregion' // Add new relationship
             ])
@@ -186,140 +183,139 @@ class AgentDashboardController extends Controller
 
     // Reports page
     public function reports(Request $request)
-{
-    $user = Auth::user();
-    $region_id = $user->region_id;
-    $type = $request->get('type', 'daily'); // default to daily if no type specified
-
-    $view_data = [
-        'region' => SysRegion::find($region_id),
-        'agents' => User::where('region_id', $region_id)->get(),
-        'type' => $type
-    ];
-
-    return view('agentuser.reports.index', $view_data);
-}
-
-public function getReportsData(Request $request)
-{
-    try {
-        $request->validate([
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'agent_id' => 'nullable|exists:users,id',
-            'type' => 'nullable|in:daily,sent,received,commission,summary'
-        ]);
-
+    {
         $user = Auth::user();
         $region_id = $user->region_id;
-        $type = $request->get('type', 'daily');
+        $type = $request->get('type', 'daily'); // default to daily if no type specified
 
-        // Base query
-        $query = SysTransaction::query();
+        $view_data = [
+            'region' => SysRegion::find($region_id),
+            'agents' => User::where('region_id', $region_id)->get(),
+            'type' => $type
+        ];
 
-        // Apply different filters based on report type
+        return view('agentuser.reports.index', $view_data);
+    }
+
+    public function getReportsData(Request $request)
+    {
+        try {
+            $request->validate([
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date',
+                'agent_id' => 'nullable|exists:users,id',
+                'type' => 'nullable|in:daily,sent,received,commission,summary'
+            ]);
+
+            $user = Auth::user();
+            $region_id = $user->region_id;
+            $type = $request->get('type', 'daily');
+
+            // Base query
+            $query = SysTransaction::query();
+
+            // Apply different filters based on report type
+            switch ($type) {
+                case 'sent':
+                    $query->where('sender_region_id', $region_id);
+                    break;
+
+                case 'received':
+                    $query->where('region_id', $region_id);
+                    break;
+
+                case 'commission':
+                    $query->where(function($q) use ($region_id) {
+                        $q->where('region_id', $region_id)
+                          ->orWhere('sender_region_id', $region_id);
+                    })->whereNotNull('commission');
+                    break;
+
+                case 'summary':
+                    $query->where(function($q) use ($region_id) {
+                        $q->where('region_id', $region_id)
+                          ->orWhere('sender_region_id', $region_id);
+                    });
+                    break;
+
+                default: // daily
+                    $query->where(function($q) use ($region_id) {
+                        $q->where('region_id', $region_id)
+                          ->orWhere('sender_region_id', $region_id);
+                    })->whereDate('created_at', Carbon::today());
+                    break;
+            }
+
+            // Date range filter
+            $query->whereBetween('created_at', [
+                Carbon::parse($request->start_date)->startOfDay(),
+                Carbon::parse($request->end_date)->endOfDay()
+            ]);
+
+            // Agent filter
+            if ($request->filled('agent_id')) {
+                $query->where(function($q) use ($request) {
+                    $q->where('sender_agent_id', $request->agent_id)
+                      ->orWhere('receiver_agent_id', $request->agent_id);
+                });
+            }
+
+            // Get transactions with relationships
+            $transactions = $query->with([
+                'senderCustomer',
+                'receiverCustomer',
+                'senderAgent',
+                'receiverAgent',
+                'senderregion'
+            ])->orderBy('created_at', 'desc')->get();
+
+            // Calculate statistics based on report type
+            $stats = $this->calculateStats($transactions, $type);
+
+            return view('agentuser.reports.results', compact('transactions', 'stats', 'type'))
+                ->render();
+
+        } catch (\Exception $e) {
+            \Log::error('Report generation error: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Error generating report',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function calculateStats($transactions, $type)
+    {
+        $stats = [
+            'total_sent' => 0,
+            'total_received' => 0,
+            'total_commission' => 0,
+            'count' => $transactions->count()
+        ];
+
         switch ($type) {
             case 'sent':
-                $query->where('sender_region_id', $region_id);
+                $stats['total_sent'] = $transactions->sum('amount');
+                $stats['total_commission'] = $transactions->sum('commission');
                 break;
 
             case 'received':
-                $query->where('region_id', $region_id);
+                $stats['total_received'] = $transactions->sum('final_delivered_amount');
+                $stats['total_commission'] = $transactions->sum('commission');
                 break;
 
             case 'commission':
-                $query->where(function($q) use ($region_id) {
-                    $q->where('region_id', $region_id)
-                      ->orWhere('sender_region_id', $region_id);
-                })->whereNotNull('commission');
+                $stats['total_commission'] = $transactions->sum('commission');
                 break;
 
             case 'summary':
-                $query->where(function($q) use ($region_id) {
-                    $q->where('region_id', $region_id)
-                      ->orWhere('sender_region_id', $region_id);
-                });
-                break;
-
-            default: // daily
-                $query->where(function($q) use ($region_id) {
-                    $q->where('region_id', $region_id)
-                      ->orWhere('sender_region_id', $region_id);
-                })->whereDate('created_at', Carbon::today());
+            case 'daily':
+                $stats['total_sent'] = $transactions->sum('amount');
+                $stats['total_received'] = $transactions->sum('final_delivered_amount');
+                $stats['total_commission'] = $transactions->sum('commission');
                 break;
         }
 
-        // Date range filter
-        $query->whereBetween('created_at', [
-            Carbon::parse($request->start_date)->startOfDay(),
-            Carbon::parse($request->end_date)->endOfDay()
-        ]);
-
-        // Agent filter
-        if ($request->filled('agent_id')) {
-            $query->where(function($q) use ($request) {
-                $q->where('sender_agent_id', $request->agent_id)
-                  ->orWhere('receiver_agent_id', $request->agent_id);
-            });
-        }
-
-        // Get transactions with relationships
-        $transactions = $query->with([
-            'senderCustomer',
-            'receiverCustomer',
-            'transactionType',
-            'senderAgent',
-            'receiverAgent',
-            'senderregion'
-        ])->orderBy('created_at', 'desc')->get();
-
-        // Calculate statistics based on report type
-        $stats = $this->calculateStats($transactions, $type);
-
-        return view('agentuser.reports.results', compact('transactions', 'stats', 'type'))
-            ->render();
-
-    } catch (\Exception $e) {
-        \Log::error('Report generation error: ' . $e->getMessage());
-        return response()->json([
-            'error' => 'Error generating report',
-            'message' => $e->getMessage()
-        ], 500);
+        return $stats;
     }
-}
-
-private function calculateStats($transactions, $type)
-{
-    $stats = [
-        'total_sent' => 0,
-        'total_received' => 0,
-        'total_commission' => 0,
-        'count' => $transactions->count()
-    ];
-
-    switch ($type) {
-        case 'sent':
-            $stats['total_sent'] = $transactions->sum('amount');
-            $stats['total_commission'] = $transactions->sum('commission');
-            break;
-
-        case 'received':
-            $stats['total_received'] = $transactions->sum('final_delivered_amount');
-            $stats['total_commission'] = $transactions->sum('commission');
-            break;
-
-        case 'commission':
-            $stats['total_commission'] = $transactions->sum('commission');
-            break;
-
-        case 'summary':
-        case 'daily':
-            $stats['total_sent'] = $transactions->sum('amount');
-            $stats['total_received'] = $transactions->sum('final_delivered_amount');
-            $stats['total_commission'] = $transactions->sum('commission');
-            break;
-    }
-
-    return $stats;
-}
 }

@@ -32,6 +32,7 @@
                                         <th>Commission %</th>
                                         <th>Limit</th>
                                         <th>Parent Agent</th>
+                                        <th>Username</th>
                                         <th>Action </th>
                                     </tr>
                                 </thead>
@@ -53,6 +54,7 @@
                                            <td>{{ $item->commission_rate ?? '-' }}</td>
                                            <td>{{ number_format($item->transfer_limit, 2) ?? '-' }}</td>
                                            <td>{{ $item->parentAgent->name ?? '-' }}</td>
+                                           <td>{{ $item->username ?? '-' }}</td>
                                             <td>
                                                 <a class="btn toggle-class {{ $item->status == 'active' ? 'btn-inverse-success' : 'btn-inverse-danger' }}"
                                                     title="Status" data-id="{{ $item->id }}"

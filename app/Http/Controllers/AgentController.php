@@ -11,11 +11,154 @@ use App\Providers\RouteServiceProvider;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Models\SysRegion;
+use Illuminate\Support\Facades\DB;
+use App\Models\SysTransaction;
 
 class AgentController extends Controller
 {
-    public function AgentDashboard(){
-        return view('agent.index');
+    public function AgentDashboard(Request $request){
+        $id = Auth::user()->id;
+        $user = User::find($id);
+
+        // Get date range from request or default to today
+        $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : Carbon::today();
+        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : Carbon::today()->endOfDay();
+
+        // Get the parent agent (the actual agent)
+        $agentId = $user->parent_agent_id;
+        $agent = User::find($agentId);
+
+        // Get agent's region
+
+        // Get total registered users for this agent
+        $totalUsers = User::where('parent_agent_id', $agentId)->count();
+
+        // Initialize stats array
+        $stats = [
+            'date_range' => [
+                'start' => $startDate->format('Y-m-d'),
+                'end' => $endDate->format('Y-m-d')
+            ],
+            'total_users' => $totalUsers,
+            'region' => [
+                'name' => $region->name ?? 'Not Specified',
+                'sent' => [
+                    'label' => 'Total Sent',
+                    'today' => 0,
+                    'total' => 0
+                ],
+                'received' => [
+                    'label' => 'Total Received',
+                    'today' => 0,
+                    'total' => 0
+                ],
+                'commission' => [
+                    'label' => 'Total Commission',
+                    'today' => 0,
+                    'total' => 0
+                ],
+                'transactions' => [
+                    'label' => 'Total Transactions',
+                    'today' => 0,
+                    'total' => 0
+                ],
+                'chart_data' => [
+                    'sent' => [],
+                    'received' => [],
+                    'dates' => []
+                ],
+                'state_stats' => [],
+                'user_stats' => [],
+                'top_states' => [],
+                'top_users' => []
+            ]
+        ];
+
+        // Get all transactions for this agent within date range
+        $allTransactions = SysTransaction::where('agent_id', $agentId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->with(['senderCustomer', 'receiverAgent', 'region'])
+            ->get();
+
+        // Get today's transactions
+        $todayTransactions = $allTransactions->where('created_at', '>=', Carbon::today());
+
+        // Calculate total statistics
+        $stats['region']['sent']['total'] = $allTransactions->sum('amount');
+        $stats['region']['received']['total'] = $allTransactions->sum('amount');
+        $stats['region']['commission']['total'] = $allTransactions->sum('commission');
+        $stats['region']['transactions']['total'] = $allTransactions->count();
+
+        // Calculate today's statistics
+        $stats['region']['sent']['today'] = $todayTransactions->sum('amount');
+        $stats['region']['received']['today'] = $todayTransactions->sum('amount');
+        $stats['region']['commission']['today'] = $todayTransactions->sum('commission');
+        $stats['region']['transactions']['today'] = $todayTransactions->count();
+
+        // Get state-wise statistics
+        $stateStats = $allTransactions->groupBy('region_id')
+            ->map(function($transactions) {
+                return [
+                    'name' => $transactions->first()->region->name ?? 'Unknown',
+                    'total_amount' => $transactions->sum('amount'),
+                    'total_transactions' => $transactions->count(),
+                    'total_commission' => $transactions->sum('commission')
+                ];
+            });
+
+        // Get user-wise statistics
+        $userStats = $allTransactions->groupBy('sender_user_id')
+            ->map(function($transactions) {
+                return [
+                    'name' => $transactions->first()->senderUser->name ?? 'Unknown',
+                    'total_amount' => $transactions->sum('amount'),
+                    'total_transactions' => $transactions->count(),
+                    'total_commission' => $transactions->sum('commission')
+                ];
+            });
+
+        // Get top 5 states by amount
+        $stats['region']['top_states'] = $stateStats->sortByDesc('total_amount')
+            ->take(5)
+            ->values()
+            ->toArray();
+
+        // Get top 5 users by amount
+        $stats['region']['top_users'] = $userStats->sortByDesc('total_amount')
+            ->take(5)
+            ->values()
+            ->toArray();
+
+        // Add state and user statistics
+        $stats['region']['state_stats'] = $stateStats->values()->toArray();
+        $stats['region']['user_stats'] = $userStats->values()->toArray();
+
+        // Get daily data for chart
+        $dateRange = collect();
+        $currentDate = $startDate->copy();
+
+        while ($currentDate <= $endDate) {
+            $dateRange->push($currentDate->copy());
+            $currentDate->addDay();
+        }
+
+        foreach ($dateRange as $date) {
+            $stats['region']['chart_data']['dates'][] = $date->format('Y-m-d');
+
+            // Get sent amount for this date
+            $sentAmount = SysTransaction::where('agent_id', $agentId)
+                ->whereDate('created_at', $date)
+                ->sum('amount');
+            $stats['region']['chart_data']['sent'][] = $sentAmount;
+
+            // Get received amount for this date
+            $receivedAmount = SysTransaction::where('agent_id', $agentId)
+                ->whereDate('created_at', $date)
+                ->sum('amount');
+            $stats['region']['chart_data']['received'][] = $receivedAmount;
+        }
+
+        return view('agent.index', compact('stats'));
     }
 
     public function AgentLogin(){
@@ -146,7 +289,7 @@ class AgentController extends Controller
 $agents = User::where('role', 'agent')
                   ->where('parent_agent_id', auth()->id())
                   ->get();
-    return view('agent.agentuser.add_agent', compact('regions', 'agents'));
+    return view('agent.agentuser.add_agent', compact('regions'));
     }
 
     public function StoreAgent(Request $request)
@@ -184,6 +327,7 @@ $agents = User::where('role', 'agent')
         // Create a new agent record
         User::create([
     'name' => $request->name,
+    'username' => $request->username,
     'email' => $request->email,
     'phone' => $request->phone,
     'address' => $request->address,
@@ -242,6 +386,7 @@ $agents = User::where('role', 'agent')
      $user->region_id = $request->region_id;
      $user->commission_rate = $request->commission_rate ?? 0;
      $user->transfer_limit = $request->transfer_limit ?? 0;
+     $user->username = $request->username;
    //  $user->parent_agent_id = $request->parent_agent_id ?? null;
      $user->description = $request->description ?? '';
      $user->updated_at = Carbon::now();

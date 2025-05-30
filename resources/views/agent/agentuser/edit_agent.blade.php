@@ -39,6 +39,11 @@
                                         value="{{ $allagent->address }}">
                                 </div>
 
+                                <div class="form-group mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <input type="text" name="username" class="form-control" value="{{ $allagent->username }}">
+                                </div>
+
                                 <div class="mb-3">
                                     <label class="form-label" for="formFile">Upload Photo</label>
                                     <input class="form-control" name="photo" type="file" id="image">

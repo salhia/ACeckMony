@@ -43,10 +43,7 @@ class SysTransaction extends Model
         return $this->belongsTo(SysCustomer::class, 'receiver_customer_id');
     }
 
-    public function transactionType()
-    {
-        return $this->belongsTo(SysTransactionType::class, 'transaction_type_id');
-    }
+
 
     public function creator()
     {
