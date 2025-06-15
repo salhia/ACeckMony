@@ -33,26 +33,57 @@
                 <h5>Region Statistics: {{ $stats['region']['name'] ?? 'Not Specified' }}</h5>
             </div>
 
-            @foreach(['sent', 'received', 'commission', 'transactions'] as $stat)
-                <div class="col-md-3 grid-margin stretch-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <h6 class="card-title mb-0">{{ $stats['region'][$stat]['label'] ?? '' }}</h6>
-                            <div class="row">
-                                <div class="col-12">
-                                    <h3 class="mb-2">{{ number_format($stats['region'][$stat]['today'] ?? 0, 2) }}</h3>
-                                    <div class="d-flex align-items-baseline">
-                                        <p class="text-success">
-                                            <span>{{ number_format($stats['region'][$stat]['today'] ?? 0, 2) }}</span>
-                                            <i data-feather="arrow-up" class="icon-sm mb-1"></i>
-                                        </p>
-                                    </div>
-                                </div>
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title mb-0">Sent Amount Today</h6>
+                        <div class="row">
+                            <div class="col-12">
+                                <h3 class="mb-2">{{ number_format($stats['region']['sent']['today'] ?? 0, 2) }}</h3>
                             </div>
                         </div>
                     </div>
                 </div>
-            @endforeach
+            </div>
+
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title mb-0">Received Amount Today</h6>
+                        <div class="row">
+                            <div class="col-12">
+                                <h3 class="mb-2">{{ number_format($stats['region']['received']['today'] ?? 0, 2) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title mb-0">Commission Today</h6>
+                        <div class="row">
+                            <div class="col-12">
+                                <h3 class="mb-2">{{ number_format($stats['region']['commission']['today'] ?? 0, 2) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title mb-0">Total Transactions Today</h6>
+                        <div class="row">
+                            <div class="col-12">
+                                <h3 class="mb-2">{{ $stats['region']['transactions']['today'] ?? 0 }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Personal Statistics -->
@@ -61,26 +92,44 @@
                 <h5>My Personal Statistics</h5>
             </div>
 
-            @foreach(['sent', 'received', 'commission', 'transactions'] as $stat)
-                <div class="col-md-3 grid-margin stretch-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <h6 class="card-title mb-0">{{ $stats['user'][$stat]['label'] ?? '' }}</h6>
-                            <div class="row">
-                                <div class="col-12">
-                                    <h3 class="mb-2">{{ number_format($stats['user'][$stat]['today'] ?? 0, 2) }}</h3>
-                                    <div class="d-flex align-items-baseline">
-                                        <p class="text-success">
-                                            <span>{{ number_format($stats['user'][$stat]['today'] ?? 0, 2) }}</span>
-                                            <i data-feather="arrow-up" class="icon-sm mb-1"></i>
-                                        </p>
-                                    </div>
-                                </div>
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title mb-0">My Sent Amount Today</h6>
+                        <div class="row">
+                            <div class="col-12">
+                                <h3 class="mb-2">{{ number_format($stats['user']['sent']['today'] ?? 0, 2) }}</h3>
                             </div>
                         </div>
                     </div>
                 </div>
-            @endforeach
+            </div>
+
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title mb-0">My Commission Today</h6>
+                        <div class="row">
+                            <div class="col-12">
+                                <h3 class="mb-2">{{ number_format($stats['user']['commission']['today'] ?? 0, 2) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title mb-0">My Transactions Today</h6>
+                        <div class="row">
+                            <div class="col-12">
+                                <h3 class="mb-2">{{ $stats['user']['transactions']['today'] ?? 0 }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         @if(session('error'))
@@ -185,6 +234,21 @@
             @endif
         </div>
     @endif
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="mb-3">Balance Summary</h5>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Opening Balance: <strong>{{ number_format($opening, 2) }} SSP</strong></li>
+                <li class="list-group-item">Deposits (Total): <strong>{{ number_format($deposits, 2) }} SSP</strong></li>
+                <li class="list-group-item">Commission (Total): <strong>{{ number_format($commission, 2) }} SSP</strong></li>
+                <li class="list-group-item">Refill (Approved): <strong>{{ number_format($refill, 2) }} SSP</strong></li>
+                <li class="list-group-item">Bank: <strong>{{ number_format($bank, 2) }} SSP</strong></li>
+                <li class="list-group-item">Deductions: <strong>{{ number_format($deductions, 2) }} SSP</strong></li>
+                <li class="list-group-item">Closing Balance: <strong>{{ number_format($closing, 2) }} SSP</strong></li>
+            </ul>
+        </div>
+    </div>
 </div>
 
 @endsection

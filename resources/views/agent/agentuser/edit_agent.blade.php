@@ -22,12 +22,6 @@
                                 </div>
 
                                 <div class="form-group mb-3">
-                                    <label for="exampleInputEmail1" class="form-label">Agent Email </label>
-                                    <input type="email" name="email" class="form-control"
-                                        value="{{ $allagent->email }}">
-                                </div>
-
-                                <div class="form-group mb-3">
                                     <label for="exampleInputEmail1" class="form-label">Agent Phone </label>
                                     <input type="text" name="phone" class="form-control"
                                         value="{{ $allagent->phone }}">
@@ -74,9 +68,6 @@
                     name: {
                         required: true,
                     },
-                    email: {
-                        required: true,
-                    },
                     phone: {
                         required: true,
                     },
@@ -88,9 +79,6 @@
                 messages: {
                     name: {
                         required: 'Please Enter Name',
-                    },
-                    email: {
-                        required: 'Please Enter Email',
                     },
                     phone: {
                         required: 'Please Enter Phone',

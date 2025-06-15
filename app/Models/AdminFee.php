@@ -9,6 +9,8 @@ class AdminFee extends Model
 {
     use HasFactory;
 
+    protected $table = 'sys_admin_fees';
+
     protected $fillable = [
         'user_id',
         'amount',
@@ -20,7 +22,8 @@ class AdminFee extends Model
         'payment_notes',
         'payment_date',
         'trnsferamount',
- ];
+        'paid_at',
+    ];
     /**
      * علاقة مع المستخدم (الوكيل)
      */

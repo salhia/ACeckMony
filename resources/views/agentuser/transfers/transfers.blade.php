@@ -32,6 +32,8 @@
                     <h5>Transfer Details</h5>
                     <p><strong>Transaction Code:</strong> {{ $transaction->transaction_code }}</p>
                     <p><strong>Date:</strong> {{ $transaction->created_at->format('Y-m-d H:i') }}</p>
+                    <p><strong>Sender Region:</strong> {{ $transaction->sendRegion->name ?? 'N/A' }}</p>
+                    <p><strong>Receiver Region:</strong> {{ $transaction->region->name ?? 'N/A' }}</p>
                     <p><strong>State:</strong> {{ $states[$transaction->state_code] ?? $transaction->state_code }}</p>
                 </div>
 
@@ -69,4 +71,6 @@
         </div>
     </div>
 </div>
+
+
 @endsection

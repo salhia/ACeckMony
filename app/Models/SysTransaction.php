@@ -14,7 +14,16 @@ class SysTransaction extends Model
         'amount', 'commission', 'admin_fee', 'net_amount', 'final_delivered_amount',
         'transaction_type_id', 'delivery_confirmation', 'delivery_proof',
         'delivery_notes', 'notes', 'status', 'type', 'created_by','region_id',
-        'agent_id'
+        'agent_id','delivered_by_user_id','delivered_at'
+    ];
+
+    protected $casts = [
+        'delivered_at' => 'datetime',
+        'amount' => 'decimal:2',
+        'commission' => 'decimal:2',
+        'admin_fee' => 'decimal:2',
+        'net_amount' => 'decimal:2',
+        'final_delivered_amount' => 'decimal:2'
     ];
 
     public function senderUser()
@@ -65,9 +74,11 @@ class SysTransaction extends Model
         return $this->belongsTo(SysRegion::class, 'region_id');
     }
 
-    public function deliveredByUser()
+
+
+    public function deliveredBy()
     {
-        return $this->belongsTo(User::class, 'delivered_by');
+        return $this->belongsTo(User::class, 'delivered_by_user_id');
     }
 
     public function senderAgent()

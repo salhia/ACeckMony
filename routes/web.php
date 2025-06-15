@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\AgentPaymentReportController;
 use App\Http\Controllers\AdminFeeController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\CashBoxController;
 
 
 Route::get('/', [HomeController::class, 'homeRedirect'])->middleware('auth');
@@ -137,20 +138,14 @@ Route::middleware(['auth', 'roles:admin'])->group(function () {
   Route::middleware(['auth', 'roles:agent'])->group(function () {
     Route::get('/agent/dashboard', [AgentController::class, 'AgentDashboard'])->name('agent.dashboard');
     Route::get('/agent/logout', [AgentController::class, 'AgentLogout'])->name('agent.logout');
-   Route::post('/agent/logout', [AgentController::class, 'AgentLogout'])->name('agent.logout');
+    Route::post('/agent/logout', [AgentController::class, 'AgentLogout'])->name('agent.logout');
     Route::get('/agent/profile', [AgentController::class, 'AgentProfile'])->name('agent.profile');
     Route::post('/agent/profile/store', [AgentController::class, 'AgentProfileStore'])->name('agent.profile.store');
     Route::get('/agent/change/passowrd', [AgentController::class, 'AgentChangePassword'])->name('agent.change.password');
     Route::post('/agent/update/password', [AgentController::class, 'AgentUpdatePassword'])->name('agent.update.password');
-
-
+    Route::get('/agent/payments/history', [AgentController::class, 'paymentHistory'])->name('agent.payments.history');
+    Route::get('/agent/payments/grouped', [AgentController::class, 'paymentsGroupedByDate'])->name('agent.payments.grouped');
 }); //End Group Agent Middleware
-
-
-
-
-
-
 
 
 
@@ -174,6 +169,10 @@ Route::middleware(['auth', 'roles:agent'])->group(function () {
     Route::get('/agent/reports/office-detailed', [AgentReportController::class, 'officeDetailed'])->name('agent.office.detailed');
     Route::get('/agent/reports/user-transactions', [AgentReportController::class, 'userTransactions'])->name('agent.user.transactions');
     Route::get('/agent/reports/commission', [AgentReportController::class, 'commissionReport'])->name('agent.commission.report');
+   Route::get('agent/users-balance-report', [AgentReportController::class, 'usersBalanceReport'])->name('agent.users.balance.report');
+
+
+
 });
 
 
@@ -196,6 +195,8 @@ Route::middleware(['auth', 'roles:agent'])->group(function () {
         Route::get('/agent/details/schedule/{id}', 'AgentDetailsSchedule')->name('agent.details.schedule');
         Route::post('/agent/update/schedule/', 'AgentUpdateSchedule')->name('agent.update.schedule');
     });
+
+
 }); // End Group Admin Middleware
 
 
@@ -282,7 +283,19 @@ Route::post('/profile/update-password', [ProfileController::class, 'updatePasswo
     Route::get('/agent/sending-transfers', [TransferController::class, 'SenderTransfers'])->name('agent.sending.transfers');
     Route::post('/transfers/update-status', [TransferController::class, 'updateStatusAjax'])->name('transfers.updateStatus.ajax');
 
-   });
+   Route::get('/agentuser/cashbox/opening', [CashBoxController::class, 'showOpeningForm'])->name('agentuser.cashbox.opening.form');
+   Route::post('/cashbox/opening', [CashBoxController::class, 'storeOpening'])->name('cashbox.opening.store');
+
+   Route::get('/cashbox/refill', [CashBoxController::class, 'showRefillForm'])->name('cashbox.refill.form');
+   Route::post('/cashbox/refill', [CashBoxController::class, 'storeRefill'])->name('cashbox.refill.store');
+
+   Route::get('/cashbox/bank', [CashBoxController::class, 'showBankForm'])->name('cashbox.bank.form');
+   Route::post('/cashbox/bank', [CashBoxController::class, 'storeBank'])->name('cashbox.bank.store');
+
+Route::get('/cashbox/daily-report', [CashBoxController::class, 'dailyReport'])->name('cashbox.daily.report');
+
+
+});
 
 // Public Transfer Verification Routes
 Route::domain('akec.money')->group(function () {
@@ -335,5 +348,7 @@ Route::get('/admin/agents/{agent}/transactions', [AgentReportController::class, 
 
 // For agent viewing their own transactions
 Route::get('/agent/transactions', [AgentReportController::class, 'myTransactions'])->name('agent.transactions');
+
+
 
 

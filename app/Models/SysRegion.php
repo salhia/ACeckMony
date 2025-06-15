@@ -38,6 +38,8 @@ class SysAgentDistributor extends Model
     {
         return $this->hasMany(SysTransaction::class, 'agent_id');
     }
+
+
 }
 
 

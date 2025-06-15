@@ -107,7 +107,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($stats['region']['top_states'] as $state)
+                                    @foreach($stats['sendRegion']['top_states'] as $state)
                                         <tr>
                                             <td>{{ $state['name'] }}</td>
                                             <td>{{ number_format($state['total_amount'], 2) }}</td>
@@ -136,7 +136,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($stats['region']['top_agents'] as $agent)
+                                    @foreach($stats['sendRegion']['top_agents'] as $agent)
                                         <tr>
                                             <td>{{ $agent['name'] }}</td>
                                             <td>{{ number_format($agent['total_amount'], 2) }}</td>
@@ -168,7 +168,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($stats['region']['state_stats'] as $state)
+                                    @foreach($stats['sendRegion']['state_stats'] as $state)
                                         <tr>
                                             <td>{{ $state['name'] }}</td>
                                             <td>{{ number_format($state['total_amount'], 2) }}</td>
@@ -201,7 +201,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($stats['region']['agent_stats'] as $agent)
+                                    @foreach($stats['sendRegion']['agent_stats'] as $agent)
                                         <tr>
                                             <td>{{ $agent['name'] }}</td>
                                             <td>{{ number_format($agent['total_amount'], 2) }}</td>

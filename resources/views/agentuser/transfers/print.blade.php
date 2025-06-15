@@ -21,7 +21,9 @@
 </head>
 <body>
     <div class="header">
-        <img src="{{ asset('image/icon.png') }}" alt="Logo" class="logo">
+        <img src="{{ public_path('image/icon.png') }}" alt="Logo" class="logo">
+
+
         <div class="title">Transfer Receipt</div>
     </div>
 
@@ -35,12 +37,14 @@
         <strong>Sender:</strong>
         <div class="line">Name: {{ $transaction->senderCustomer->name }}</div>
         <div class="line">Phone: {{ $transaction->senderCustomer->phone }}</div>
+        <div class="line">Sender Region: {{ $transaction->sendRegion->name ?? 'N/A' }}</div>
     </div>
 
     <div class="section">
         <strong>Receiver:</strong>
         <div class="line">Name: {{ $transaction->receiverCustomer->name }}</div>
         <div class="line">Phone: {{ $transaction->receiverCustomer->phone }}</div>
+        <div class="line">Receiver Region: {{ $transaction->region->name ?? 'N/A' }}</div>
     </div>
 
     <div class="section">

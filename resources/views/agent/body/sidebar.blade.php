@@ -5,7 +5,7 @@
         </a>
     </div>
 
-    <div class="sidebar-body">
+    <div class="sidebar-body" id="sidebarAccordion">
         <ul class="nav">
 
             <li class="nav-item nav-category">Agent Dashboard</li>
@@ -24,7 +24,7 @@
                     <span class="link-title">agent Management</span>
                     <i class="link-arrow" data-feather="chevron-down"></i>
                 </a>
-                <div class="collapse" id="customersManagement">
+                <div class="collapse" id="customersManagement" data-bs-parent="#sidebarAccordion">
                     <ul class="nav sub-menu">
                         <li class="nav-item">
                             <a href="{{ route('all.agent') }}" class="nav-link">Agent List</a>
@@ -43,17 +43,16 @@
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="collapse" href="#transactionsMenu" role="button" aria-expanded="false" aria-controls="transactionsMenu">
                     <i class="link-icon" data-feather="repeat"></i>
-                    <span class="link-title">Transactions</span>
+                    <span class="link-title">Fee payment Details</span>
                     <i class="link-arrow" data-feather="chevron-down"></i>
                 </a>
-                <div class="collapse" id="transactionsMenu">
+                <div class="collapse" id="transactionsMenu" data-bs-parent="#sidebarAccordion">
                     <ul class="nav sub-menu">
-
                         <li class="nav-item">
-                            <a href="{{ route('agent.transactions') }}" class="nav-link">Transactions History</a>
+                            <a href="{{ route('agent.payments.grouped') }}" class="nav-link">Payment paid (Grouped by Date)</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">Search Transactions</a>
+                            <a href="{{ route('agent.payments.history') }}" class="nav-link">Search Payment History</a>
                         </li>
                     </ul>
                 </div>
@@ -69,7 +68,7 @@
                     <span class="link-title">Reports</span>
                     <i class="link-arrow" data-feather="chevron-down"></i>
                 </a>
-                <div class="collapse" id="reportsMenu">
+                <div class="collapse" id="reportsMenu" data-bs-parent="#sidebarAccordion">
                     <ul class="nav sub-menu">
                         <li class="nav-item">
                             <a href="{{ route('agent.office.summary') }}" class="nav-link">Office Summary Report</a>
@@ -82,6 +81,9 @@
                         </li>
                         <li class="nav-item">
                             <a href="{{ route('agent.commission.report') }}" class="nav-link">Commission Report</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('agent.users.balance.report') }}" class="nav-link">Users Balance Report</a>
                         </li>
                     </ul>
                 </div>

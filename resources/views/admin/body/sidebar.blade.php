@@ -51,36 +51,15 @@
                             <a href="{{ route('transaction.history') }}" class="nav-link">Transaction History</a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('transaction.details', ['id' => 1]) }}" class="nav-link">Transaction Details</a>
+                            <a href="{{ route('admin.agent.payments.report') }}" class="nav-link">Agent Payment </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{{ route('transaction.print', ['id' => 1]) }}" class="nav-link">Print Receipt</a>
-                        </li>
+
                     </ul>
                 </div>
-            </li>
+             </li>
 
             <!-- Commissions & Discounts -->
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#commissionsDiscounts" role="button" aria-expanded="false" aria-controls="commissionsDiscounts">
-                    <i class="link-icon" data-feather="percent"></i>
-                    <span class="link-title">Commissions & Discounts</span>
-                    <i class="link-arrow" data-feather="chevron-down"></i>
-                </a>
-                <div class="collapse" id="commissionsDiscounts">
-                    <ul class="nav sub-menu">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">Commission Settings</a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">Hierarchy Structure</a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">Profit Distribution</a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+
 
             <!-- Reports -->
             <li class="nav-item">
@@ -100,9 +79,7 @@
                         <li class="nav-item">
                             <a href="#" class="nav-link">Financial Reports</a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{{ route('admin.agent.payments.report') }}" class="nav-link">Agent Payment Report</a>
-                        </li>
+
                     </ul>
                 </div>
             </li>

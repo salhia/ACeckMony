@@ -12,12 +12,14 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
      public function Index(){
-         return view('agentuser.index');
+         $dashboardController = new \App\Http\Controllers\AgentDashboardController();
+         return $dashboardController->index();
      }
 
      public function userDashboard(){
-        return view('agentuser.index');
-    }
+         $dashboardController = new \App\Http\Controllers\AgentDashboardController();
+         return $dashboardController->index();
+     }
 
     public function UserProfile(){
         $id = Auth::user()->id; //collect user data from database

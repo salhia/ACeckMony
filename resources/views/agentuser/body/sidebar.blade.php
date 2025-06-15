@@ -4,12 +4,9 @@
             Akec<span>Money</span>
         </a>
     </div>
-
     <div class="sidebar-body">
         <ul class="nav">
-
             <li class="nav-item nav-category">User Panel</li>
-
             <!-- Dashboard -->
             <li class="nav-item">
                 <a href="{{ route('user.dashboard') }}" class="nav-link">
@@ -17,7 +14,6 @@
                     <span class="link-title">Dashboard</span>
                 </a>
             </li>
-
             <!-- Transfers -->
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="collapse" href="#transferMenu" role="button" aria-expanded="false" aria-controls="transferMenu">
@@ -42,10 +38,31 @@
                             <a href="{{ route('transfers.index') }}" class="nav-link"> ALL Transfers </a>
                         </li>
 
-
-
-
                     </ul>
+                </div>
+            </li>
+
+            <!-- Cashbox -->
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#cashboxMenu" role="button" aria-expanded="false" aria-controls="cashboxMenu">
+                    <i class="link-icon" data-feather="credit-card"></i>
+                    <span class="link-title">Cashbox</span>
+                    <i class="link-arrow" data-feather="chevron-down"></i>
+                </a>
+                <div class="collapse" id="cashboxMenu">
+                    <ul class="nav sub-menu">
+
+                    <li class="nav-item">
+                        <a href="{{ route('agentuser.cashbox.opening.form') }}" class="nav-link">Opening Balance</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('cashbox.refill.form') }}" class="nav-link">Refill Cashbox</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('cashbox.bank.form') }}" class="nav-link">Bank Deposit</a>
+                    </li>
+
+                   </ul>
                 </div>
             </li>
 
@@ -76,8 +93,7 @@
                     </ul>
                 </div>
             </li>
-
-            <!-- Profile -->
+           <!-- Profile -->
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="collapse" href="#profileMenu" role="button" aria-expanded="false" aria-controls="profileMenu">
                     <i class="link-icon" data-feather="user"></i>
@@ -94,6 +110,12 @@
                         </li>
                     </ul>
                 </div>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('cashbox.daily.report') }}" class="nav-link">
+                    <i class="fas fa-file-alt"></i> Daily Cashbox Report
+                </a>
             </li>
 
         </ul>

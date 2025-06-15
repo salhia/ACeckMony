@@ -357,4 +357,46 @@ class AgentReportController extends Controller
 
         return view('agent.transactions.history', compact('transactions'));
     }
+
+ public function usersBalanceReport(Request $request)
+    {
+        $agentId = auth()->id();
+        $date = $request->input('date', now()->toDateString());
+        $selectedUserId = $request->input('user_id');
+        // Get all users under this agent
+        $usersQuery = \App\Models\User::where('parent_agent_id', $agentId);
+        if ($selectedUserId) {
+            $usersQuery->where('id', $selectedUserId);
+        }
+        $users = $usersQuery->get();
+        $report = [];
+        foreach ($users as $user) {
+            $transactions = \App\Models\CashBoxTransaction::where('user_id', $user->id)
+                ->where('date', $date)
+                ->get();
+            $opening = $transactions->where('type', 'opening')->sum('amount');
+            $deposits = $transactions->where('type', 'deposit')->sum('amount');
+            $withdrawals = $transactions->where('type', 'withdraw')->sum('amount');
+            $refill = $transactions->where('type', 'refill')->where('approved', true)->sum('amount');
+            $bank = $transactions->where('type', 'bank')->sum('amount');
+            $commission = $transactions->where('type', 'commission')->sum('amount');
+            $deductions = abs($withdrawals);
+            $closing = $opening + $deposits + $refill + $withdrawals + $bank + $commission;
+            $report[] = [
+                'user' => $user,
+                'opening' => $opening,
+                'deposits' => $deposits,
+                'commission' => $commission,
+                'refill' => $refill,
+                'bank' => $bank,
+                'deductions' => $deductions,
+                'closing' => $closing,
+            ];
+        }
+
+        // أرسل قائمة المستخدمين للواجهة لعرضها في القائمة المنسدلة
+        $allUsers = \App\Models\User::where('parent_agent_id', $agentId)->get();
+
+        return view('agent.reports.users_balance', compact('report', 'date', 'allUsers', 'selectedUserId'));
+    }
 }

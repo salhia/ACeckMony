@@ -75,6 +75,7 @@ class AdminFeeController extends Controller
                         'trnsferamount' => $transaction->amount,
                         'amount' => $transaction->admin_fee,
                         'percentage' => $percentage,
+
                         'status' => 'pending',
                         'description' => 'عمولة من معاملة #' . $transaction->id,
                         'transaction_id' => $transaction->id

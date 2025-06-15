@@ -14,138 +14,120 @@ use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use App\Models\SysTransaction;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
     public function AdminDashboard(Request $request)
     {
-        // Get date range from request or default to today
         $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : Carbon::today();
         $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : Carbon::today()->endOfDay();
 
         // Get total agents
         $totalAgents = User::where('role', 'agent')->count();
 
-        // Initialize stats array
-        $stats = [
-            'date_range' => [
-                'start' => $startDate->format('Y-m-d'),
-                'end' => $endDate->format('Y-m-d')
-            ],
-            'total_agents' => $totalAgents,
-            'region' => [
-                'name' => 'All Regions',
-                'sent' => [
-                    'label' => 'Total Transfers',
-                    'today' => 0,
-                    'total' => 0
-                ],
-                'received' => [
-                    'label' => 'Total Received',
-                    'today' => 0,
-                    'total' => 0
-                ],
-                'commission' => [
-                    'label' => 'Total Admin Fee',
-                    'today' => 0,
-                    'total' => 0
-                ],
-                'transactions' => [
-                    'label' => 'Total Transactions',
-                    'today' => 0,
-                    'total' => 0
-                ],
-                'chart_data' => [
-                    'sent' => [],
-                    'received' => [],
-                    'dates' => []
-                ],
-                'state_stats' => [],
-                'agent_stats' => [],
-                'top_states' => [],
-                'top_agents' => []
-            ]
-        ];
-
         // Get all transactions within date range
         $allTransactions = SysTransaction::whereBetween('created_at', [$startDate, $endDate])
-            ->with(['senderCustomer', 'receiverAgent', 'region', 'agent'])
+            ->with(['senderCustomer', 'receiverAgent', 'sendRegion', 'senderAgent'])
             ->get();
 
         // Get today's transactions
         $todayTransactions = $allTransactions->where('created_at', '>=', Carbon::today());
 
         // Calculate total statistics
-        $stats['region']['sent']['total'] = $allTransactions->sum('amount');
-        $stats['region']['received']['total'] = $allTransactions->sum('amount');
-        $stats['region']['commission']['total'] = $allTransactions->sum('admin_fee');
-        $stats['region']['transactions']['total'] = $allTransactions->count();
-
-        // Calculate today's statistics
-        $stats['region']['sent']['today'] = $todayTransactions->sum('amount');
-        $stats['region']['received']['today'] = $todayTransactions->sum('amount');
-        $stats['region']['commission']['today'] = $todayTransactions->sum('admin_fee');
-        $stats['region']['transactions']['today'] = $todayTransactions->count();
-
-        // Get state-wise statistics
-        $stateStats = $allTransactions->groupBy('region_id')
-            ->map(function($transactions) {
-                return [
-                    'name' => $transactions->first()->region->name ?? 'Unknown',
-                    'total_amount' => $transactions->sum('amount'),
-                    'total_transactions' => $transactions->count(),
-                    'total_admin_fee' => $transactions->sum('admin_fee')
-                ];
-            });
-
-        // Get agent-wise statistics
-        $agentStats = $allTransactions->groupBy('agent_id')
-            ->map(function($transactions) {
-                return [
-                    'name' => $transactions->first()->agent->name ?? 'Unknown',
-                    'total_amount' => $transactions->sum('amount'),
-                    'total_transactions' => $transactions->count(),
-                    'total_admin_fee' => $transactions->sum('admin_fee')
-                ];
-            });
-
-        // Get top 5 states by amount
-        $stats['region']['top_states'] = $stateStats->sortByDesc('total_amount')
-            ->take(5)
-            ->values()
-            ->toArray();
-
-        // Get top 5 agents by amount
-        $stats['region']['top_agents'] = $agentStats->sortByDesc('total_amount')
-            ->take(5)
-            ->values()
-            ->toArray();
-
-        // Add state and agent statistics
-        $stats['region']['state_stats'] = $stateStats->values()->toArray();
-        $stats['region']['agent_stats'] = $agentStats->values()->toArray();
+        $stats = [
+            'date_range' => [
+                'start' => $startDate->format('Y-m-d'),
+                'end' => $endDate->format('Y-m-d')
+            ],
+            'total_agents' => $totalAgents,
+            'sendRegion' => [
+                'name' => 'All Regions',
+                'sent' => [
+                    'label' => 'Total Transfers',
+                    'today' => $todayTransactions->sum('amount'),
+                    'total' => $allTransactions->sum('amount')
+                ],
+                'received' => [
+                    'label' => 'Total Received',
+                    'today' => $todayTransactions->sum('amount'),
+                    'total' => $allTransactions->sum('amount')
+                ],
+                'commission' => [
+                    'label' => 'Total Admin Fee',
+                    'today' => $todayTransactions->sum('admin_fee'),
+                    'total' => $allTransactions->sum('admin_fee')
+                ],
+                'transactions' => [
+                    'label' => 'Total Transactions',
+                    'today' => $todayTransactions->count(),
+                    'total' => $allTransactions->count()
+                ],
+                'chart_data' => [
+                    'sent' => [],
+                    'received' => [],
+                    'dates' => []
+                ],
+                // State-wise statistics (by sender_region_id)
+                'state_stats' => $allTransactions->groupBy('sender_region_id')
+                    ->map(function($transactions) {
+                        return [
+                            'name' => $transactions->first()->sendRegion->name ?? 'Unknown',
+                            'total_amount' => $transactions->sum('amount'),
+                            'total_transactions' => $transactions->count(),
+                            'total_admin_fee' => $transactions->sum('admin_fee')
+                        ];
+                    })->values()->toArray(),
+                // Top 5 states by amount (by sender_region_id)
+                'top_states' => $allTransactions->groupBy('sender_region_id')
+                    ->map(function($transactions) {
+                        return [
+                            'name' => $transactions->first()->sendRegion->name ?? 'Unknown',
+                            'total_amount' => $transactions->sum('amount'),
+                            'total_transactions' => $transactions->count(),
+                            'total_admin_fee' => $transactions->sum('admin_fee')
+                        ];
+                    })->sortByDesc('total_amount')->take(5)->values()->toArray(),
+                // Agent-wise statistics (by sender_agent_id)
+                'agent_stats' => $allTransactions->groupBy('sender_agent_id')
+                    ->map(function($transactions) {
+                        return [
+                            'name' => $transactions->first()->senderAgent->name ?? 'Unknown',
+                            'total_amount' => $transactions->sum('amount'),
+                            'total_transactions' => $transactions->count(),
+                            'total_admin_fee' => $transactions->sum('admin_fee')
+                        ];
+                    })->values()->toArray(),
+                // Top 5 agents by amount (by sender_agent_id)
+                'top_agents' => $allTransactions->groupBy('sender_agent_id')
+                    ->map(function($transactions) {
+                        return [
+                            'name' => $transactions->first()->senderAgent->name ?? 'Unknown',
+                            'total_amount' => $transactions->sum('amount'),
+                            'total_transactions' => $transactions->count(),
+                            'total_admin_fee' => $transactions->sum('admin_fee')
+                        ];
+                    })->sortByDesc('total_amount')->take(5)->values()->toArray(),
+            ]
+        ];
 
         // Get daily data for chart
         $dateRange = collect();
         $currentDate = $startDate->copy();
-
         while ($currentDate <= $endDate) {
             $dateRange->push($currentDate->copy());
             $currentDate->addDay();
         }
-
         foreach ($dateRange as $date) {
-            $stats['region']['chart_data']['dates'][] = $date->format('Y-m-d');
-
-            // Get sent amount for this date
+            $stats['sendRegion']['chart_data']['dates'][] = $date->format('Y-m-d');
+            // Get sent amount for this date (by sender_region_id)
             $sentAmount = SysTransaction::whereDate('created_at', $date)
                 ->sum('amount');
-            $stats['region']['chart_data']['sent'][] = $sentAmount;
-
-            // Get received amount for this date
+            $stats['sendRegion']['chart_data']['sent'][] = $sentAmount;
+            // Get received amount for this date (by sender_region_id)
             $receivedAmount = SysTransaction::whereDate('created_at', $date)
                 ->sum('amount');
-            $stats['region']['chart_data']['received'][] = $receivedAmount;
+            $stats['sendRegion']['chart_data']['received'][] = $receivedAmount;
         }
 
         return view('admin.index', compact('stats'));

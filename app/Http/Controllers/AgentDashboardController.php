@@ -7,6 +7,7 @@ use App\Models\SysAgentEarning;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\CashBoxTransaction;
 use App\Models\SysRegion;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -18,7 +19,21 @@ class AgentDashboardController extends Controller
         try {
             $user = Auth::user();
             $region_id = $user->region_id;
-            $agent_id = $user->id;
+            $agent_id = $user->parent_agent_id;
+            $user_id = $user->id;
+
+
+        $today = \Carbon\Carbon::today()->toDateString();
+
+       $exists =CashBoxTransaction::where('user_id', $user->id)
+        ->where('date', $today)
+        ->where('type', 'opening')
+        ->exists();
+
+    if (!$exists) {
+        return redirect()->route('agentuser.cashbox.opening.form');
+    }
+
 
             // Collect region statistics - update for sender and receiver
             $regionTransactions = SysTransaction::where(function($query) use ($region_id) {
@@ -28,27 +43,32 @@ class AgentDashboardController extends Controller
             ->whereDate('created_at', Carbon::today())
             ->select(
                 DB::raw('COALESCE(SUM(CASE WHEN sender_region_id = ' . $region_id . ' THEN amount ELSE 0 END), 0) as today_sent'),
-                DB::raw('COALESCE(SUM(CASE WHEN region_id = ' . $region_id . ' THEN final_delivered_amount ELSE 0 END), 0) as today_received'),
-                DB::raw('COALESCE(COUNT(*), 0) as today_count'),
-                DB::raw('COALESCE(SUM(commission), 0) as today_commission')
+                DB::raw('COALESCE(SUM(CASE WHEN region_id = ' . $region_id . ' AND status = "completed" THEN final_delivered_amount ELSE 0 END), 0) as today_received'),
+                DB::raw('COUNT(DISTINCT CASE WHEN sender_region_id = ' . $region_id . ' THEN id END) as today_count'),
+                DB::raw('COALESCE(SUM(CASE WHEN sender_region_id = ' . $region_id . ' THEN commission ELSE 0 END), 0) as today_commission')
             )->first();
 
             // Collect user statistics - update for sending and receiving agent
-            $userTransactions = SysTransaction::where(function($query) use ($agent_id) {
-                $query->where('sender_agent_id', $agent_id) // Sent transfers
-                      ->orWhere('receiver_agent_id', $agent_id); // Received transfers
+            $userTransactions = SysTransaction::where(function($query) use ($user_id, $region_id) {
+                $query->where('sender_user_id', $user_id); // Sent transfers
             })
             ->whereDate('created_at', Carbon::today())
             ->select(
-                DB::raw('COALESCE(SUM(CASE WHEN sender_agent_id = ' . $agent_id . ' THEN amount ELSE 0 END), 0) as today_sent'),
-                DB::raw('COALESCE(SUM(CASE WHEN receiver_agent_id = ' . $agent_id . ' THEN final_delivered_amount ELSE 0 END), 0) as today_received'),
-                DB::raw('COALESCE(COUNT(*), 0) as today_count'),
-                DB::raw('COALESCE(SUM(commission), 0) as today_commission')
+                // For sent transactions (by this agent)
+                DB::raw('COALESCE(SUM(CASE WHEN sender_user_id = ' . $user_id . ' THEN amount ELSE 0 END), 0) as today_sent'),
+                // Count unique transactions for this agent
+                DB::raw('COUNT(DISTINCT CASE WHEN sender_user_id = ' . $user_id . ' OR receiver_agent_id = ' . $agent_id . ' THEN id END) as today_count'),
+                // Commission for this agent
+                DB::raw('COALESCE(SUM(CASE WHEN sender_user_id = ' . $user_id . ' OR receiver_agent_id = ' . $agent_id . ' THEN commission ELSE 0 END), 0) as today_commission')
             )->first();
 
-            // Print data for verification
-            \Log::info('Region Transactions:', (array)$regionTransactions);
-            \Log::info('User Transactions:', (array)$userTransactions);
+            // Get raw transaction data for debugging
+            $rawTransactions = SysTransaction::where(function($query) use ($agent_id) {
+                $query->where('sender_agent_id', $agent_id)
+                      ->orWhere('receiver_agent_id', $agent_id);
+            })
+            ->whereDate('created_at', Carbon::today())
+            ->get();
 
             // Compile data into a single array
             $stats = [
@@ -82,11 +102,6 @@ class AgentDashboardController extends Controller
                         'total' => $userTransactions->today_sent ?? 0,
                         'label' => 'My Sent Amount Today'
                     ],
-                    'received' => [
-                        'today' => $userTransactions->today_received ?? 0,
-                        'total' => $userTransactions->today_received ?? 0,
-                        'label' => 'My Received Amount Today'
-                    ],
                     'commission' => [
                         'today' => $userTransactions->today_commission ?? 0,
                         'total' => $userTransactions->today_commission ?? 0,
@@ -107,7 +122,26 @@ class AgentDashboardController extends Controller
             // Update chart function to match the same logic
             $stats['region']['chart_data'] = $this->getChartData($region_id, null);
 
-            return view('agentuser.index', compact('stats'));
+            // جلب بيانات الرصيد من CashBoxTransaction
+            $userId = $user->id;
+            $today = \Carbon\Carbon::today()->toDateString();
+            $cashboxTransactions = \App\Models\CashBoxTransaction::where('user_id', $userId)
+                ->where('date', $today)
+                ->get();
+
+            $opening = $cashboxTransactions->where('type', 'opening')->sum('amount');
+            $deposits = $cashboxTransactions->where('type', 'deposit')->sum('amount');
+            $withdrawals = $cashboxTransactions->where('type', 'withdraw')->sum('amount');
+            $refill = $cashboxTransactions->where('type', 'refill')->where('approved', true)->sum('amount');
+            $bank = $cashboxTransactions->where('type', 'bank')->sum('amount');
+            $commission = $cashboxTransactions->where('type', 'commission')->sum('amount');
+            $deductions = abs($withdrawals);
+            $closing = $opening + $deposits + $refill + $withdrawals + $bank + $commission;
+
+            return view('agentuser.index', compact(
+                'stats',
+                'opening', 'deposits', 'commission', 'refill', 'bank', 'deductions', 'closing'
+            ));
 
         } catch (\Exception $e) {
             \Log::error('Dashboard Error: ' . $e->getMessage());
@@ -210,20 +244,17 @@ class AgentDashboardController extends Controller
             $user = Auth::user();
             $region_id = $user->region_id;
             $type = $request->get('type', 'daily');
-
             // Base query
             $query = SysTransaction::query();
-
             // Apply different filters based on report type
             switch ($type) {
                 case 'sent':
                     $query->where('sender_region_id', $region_id);
                     break;
-
                 case 'received':
-                    $query->where('region_id', $region_id);
+                    $query->where('region_id', $region_id)
+                          ->where('status', 'completed');
                     break;
-
                 case 'commission':
                     $query->where(function($q) use ($region_id) {
                         $q->where('region_id', $region_id)
@@ -237,12 +268,11 @@ class AgentDashboardController extends Controller
                           ->orWhere('sender_region_id', $region_id);
                     });
                     break;
-
                 default: // daily
                     $query->where(function($q) use ($region_id) {
                         $q->where('region_id', $region_id)
                           ->orWhere('sender_region_id', $region_id);
-                    })->whereDate('created_at', Carbon::today());
+                    });
                     break;
             }
 
@@ -269,8 +299,20 @@ class AgentDashboardController extends Controller
                 'senderregion'
             ])->orderBy('created_at', 'desc')->get();
 
-            // Calculate statistics based on report type
-            $stats = $this->calculateStats($transactions, $type);
+            \Log::info(
+                'Query here: ' . vsprintf(
+                    str_replace('?', "'%s'", $query->toSql()),
+                    $query->getBindings()
+                )
+            );
+
+            // Calculate statistics
+            $stats = [
+                'total_sent' => $transactions->where('sender_region_id', $region_id)->sum('amount'),
+                'total_received' => $transactions->where('region_id', $region_id)->where('status', 'completed')->sum('final_delivered_amount'),
+                'total_commission' => $transactions->sum('commission'),
+                'count' => $transactions->count()
+            ];
 
             return view('agentuser.reports.results', compact('transactions', 'stats', 'type'))
                 ->render();
@@ -282,40 +324,5 @@ class AgentDashboardController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
-    }
-
-    private function calculateStats($transactions, $type)
-    {
-        $stats = [
-            'total_sent' => 0,
-            'total_received' => 0,
-            'total_commission' => 0,
-            'count' => $transactions->count()
-        ];
-
-        switch ($type) {
-            case 'sent':
-                $stats['total_sent'] = $transactions->sum('amount');
-                $stats['total_commission'] = $transactions->sum('commission');
-                break;
-
-            case 'received':
-                $stats['total_received'] = $transactions->sum('final_delivered_amount');
-                $stats['total_commission'] = $transactions->sum('commission');
-                break;
-
-            case 'commission':
-                $stats['total_commission'] = $transactions->sum('commission');
-                break;
-
-            case 'summary':
-            case 'daily':
-                $stats['total_sent'] = $transactions->sum('amount');
-                $stats['total_received'] = $transactions->sum('final_delivered_amount');
-                $stats['total_commission'] = $transactions->sum('commission');
-                break;
-        }
-
-        return $stats;
     }
 }

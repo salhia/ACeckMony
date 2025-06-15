@@ -13,12 +13,17 @@ use Illuminate\Support\Facades\Log;
 use App\Models\SysRegion;
 use Illuminate\Support\Facades\DB;
 use App\Models\SysTransaction;
+use App\Models\CashBoxTransaction;
+
+use App\Models\AdminFee;
+use PDF;
 
 class AgentController extends Controller
 {
     public function AgentDashboard(Request $request){
         $id = Auth::user()->id;
         $user = User::find($id);
+
 
         // Get date range from request or default to today
         $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : Carbon::today();
@@ -158,7 +163,16 @@ class AgentController extends Controller
             $stats['region']['chart_data']['received'][] = $receivedAmount;
         }
 
-        return view('agent.index', compact('stats'));
+        // Get pending and paid amounts
+        $pendingAmount = AdminFee::where('user_id', $agentId)
+            ->where('status', 'pending')
+            ->sum('amount');
+
+        $paidAmount = AdminFee::where('user_id', $agentId)
+            ->where('status', 'paid')
+            ->sum('paid_amount');
+
+        return view('agent.index', compact('stats', 'pendingAmount', 'paidAmount'));
     }
 
     public function AgentLogin(){
@@ -297,7 +311,7 @@ $agents = User::where('role', 'agent')
         // Validate the incoming request
        $request->validate([
     'name' => 'required|string|max:255',
-    'email' => 'required|email|unique:users,email,' . ($request->id ?? 'NULL'),
+ //   'email' => 'required|email|unique:users,email,' . ($request->id ?? 'NULL'),
     'phone' => 'required|string|max:15',
     'address' => 'required|string|max:255',
     'region_id' => 'required|integer',
@@ -328,7 +342,7 @@ $agents = User::where('role', 'agent')
         User::create([
     'name' => $request->name,
     'username' => $request->username,
-    'email' => $request->email,
+  //  'email' => $request->email,
     'phone' => $request->phone,
     'address' => $request->address,
     'photo' => $save_url,
@@ -380,7 +394,7 @@ $agents = User::where('role', 'agent')
         }
         // Update the user's other attributes
      $user->name = $request->name;
-     $user->email = $request->email;
+  //   $user->email = $request->email;
      $user->phone = $request->phone;
      $user->address = $request->address;
      $user->region_id = $request->region_id;
@@ -446,8 +460,52 @@ $agents = User::where('role', 'agent')
         return response()->json(['success' => 'Status Change Successfully']);
     } // End Method
 
+    public function paymentHistory(Request $request)
+    {
+        $agentId = Auth::user()->id;
+        $query = AdminFee::where('user_id', $agentId);
 
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $start = $request->start_date . ' 00:00:00';
+            $end = $request->end_date . ' 23:59:59';
+            $query->whereBetween('paid_at', [$start, $end]);
+        }
 
+        $payments = $query->orderBy('created_at', 'desc')->paginate(20);
 
+        // PDF Export
+        if ($request->has('export_pdf')) {
+            // Get all results for PDF (not paginated)
+            $allPayments = $query->orderBy('created_at', 'desc')->get();
+            $pdf = PDF::loadView('agent.reports.payment_history_pdf', compact('allPayments'));
+            return $pdf->download('payment-history.pdf');
+        }
+
+        return view('agent.reports.payment_history', compact('payments'));
+    }
+
+    public function paymentsGroupedByDate(Request $request)
+    {
+        $agentId = Auth::user()->id;
+        $query = AdminFee::where('user_id', $agentId)
+            ->where('status', 'paid');
+
+        if ($request->filled('date')) {
+            $query->whereDate('paid_at', $request->date);
+        }
+
+        $payments = $query->orderBy('paid_at', 'desc')->get()
+            ->groupBy(function($item) {
+                return $item->paid_at ? \Carbon\Carbon::parse($item->paid_at)->format('Y-m-d') : 'No Date';
+            });
+
+        // Handle PDF export
+        if ($request->has('export_pdf')) {
+            $pdf = PDF::loadView('agent.reports.payments_grouped_by_date_pdf', compact('payments'));
+            return $pdf->download('payments-grouped-by-date.pdf');
+        }
+
+        return view('agent.reports.payments_grouped_by_date', compact('payments'));
+    }
 }
 

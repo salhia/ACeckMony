@@ -38,13 +38,8 @@
     </div>
 
     <div class="form-group mb-3">
-        <label>Agent Email</label>
-        <input type="email" name="email" class="form-control" required>
-    </div>
-
-    <div class="form-group mb-3">
         <label>Username</label>
-        <input type="text" name="username" class="form-control">
+        <input type="text" name="username" class="form-control" autocomplete="off">
     </div>
 
     <div class="form-group mb-3">
@@ -104,13 +99,11 @@
             $('#myForm').validate({
                 rules: {
                     name: { required: true },
-                    email: { required: true, email: true },
                     address: { required: true },
                     password: { required: true }
                 },
                 messages: {
                     name: { required: 'Please enter the agent\'s name.' },
-                    email: { required: 'Please enter the agent\'s email.', email: 'Please enter a valid email address.' },
                     address: { required: 'Please enter the agent\'s address.' },
                     password: { required: 'Please enter a password.' }
                 },

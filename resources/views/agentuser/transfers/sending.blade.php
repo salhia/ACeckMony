@@ -14,9 +14,7 @@
         <div class="card-body table-responsive">
         <!-- Status Filter Buttons -->
     <div class="mb-3">
-        <a href="{{ route('agent.sending.transfers', ['status' => 'pending']) }}" class="btn btn-warning btn-sm">
-            <i data-feather="clock"></i> Pending
-        </a>
+
         <a href="{{ route('agent.sending.transfers', ['status' => 'completed']) }}" class="btn btn-success btn-sm">
             <i data-feather="check-circle"></i> Completed
         </a>
@@ -27,6 +25,18 @@
             <i data-feather="truck"></i> Delivered
         </a>
     </div>
+
+    <form method="GET" action="" class="row g-2 mb-3">
+        <div class="col-auto">
+            <input type="date" name="date_from" class="form-control" value="{{ request('date_from', now()->toDateString()) }}">
+        </div>
+        <div class="col-auto">
+            <input type="date" name="date_to" class="form-control" value="{{ request('date_to', now()->toDateString()) }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    </form>
             <div class="table-responsive">
     <table class="table table-bordered table-striped" id="transfersTable">
         <thead>
@@ -65,9 +75,14 @@
 
 
     @if($transaction->created_by === auth()->id())
-    <button class="btn btn-success btn-xs status-btn" data-id="{{ $transaction->id }}" data-status="completed" title="Mark as Completed">
-        <i data-feather="check-circle"></i>
-    </button>
+
+ <button class="btn btn-sm btn-danger status-btn"
+                                                    data-id="{{ $transaction->id }}"
+                                                    data-status="rejected"
+                                                    title="Reject">
+                                                <i data-feather="x-circle"></i>
+                                            </button>
+
 @endif
 </td>
                 </tr>
