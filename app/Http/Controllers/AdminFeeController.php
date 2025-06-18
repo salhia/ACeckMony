@@ -32,8 +32,8 @@ class AdminFeeController extends Controller
             // جلب المعاملات التي لم يتم نقلها بعد
             $transactions = SysTransaction::whereNotExists(function ($query) {
                 $query->select(DB::raw(1))
-                    ->from('admin_fees')
-                    ->whereRaw('admin_fees.transaction_id = sys_transactions.id');
+                    ->from('sys_admin_fees')
+                    ->whereRaw('sys_admin_fees.transaction_id = sys_transactions.id');
             })
             ->where('status', 'completed')
             ->get();
@@ -271,7 +271,7 @@ class AdminFeeController extends Controller
 
             $request->validate([
                 'payment_ids' => 'required|array',
-                'payment_ids.*' => 'exists:admin_fees,id',
+                'payment_ids.*' => 'exists:sys_admin_fees,id',
                 'amount' => 'required|numeric|min:0',
                 'notes' => 'nullable|string',
                 'paid_at' => 'required|date_format:Y-m-d\TH:i'

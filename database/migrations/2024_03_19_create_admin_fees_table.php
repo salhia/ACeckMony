@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('admin_fees', function (Blueprint $table) {
+        Schema::create('sys_admin_fees', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->foreignId('transaction_id')->nullable()->constrained('sys_transactions')->onDelete('set null');
