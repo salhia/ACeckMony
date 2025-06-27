@@ -34,9 +34,9 @@ class AdminFeeController extends Controller
                 $query->select(DB::raw(1))
                     ->from('sys_admin_fees')
                     ->whereRaw('sys_admin_fees.transaction_id = sys_transactions.id');
-            })
-            ->where('status', 'completed')
-            ->get();
+            }) ->get();
+           // ->where('status', 'completed')
+
 
             Log::info('Transactions to be processed: ' . $transactions->count());
 
