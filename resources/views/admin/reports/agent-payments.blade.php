@@ -9,7 +9,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h4 class="card-title">Agent Payments Report</h4>
+                            <h4 class="card-title">Supper Agent Payments Report</h4>
                             <div>
                                 <a href="{{ route('admin.agent.payments.history') }}" class="btn btn-info">Payment History</a>
                                 <button id="transferPayments" class="btn btn-primary">Transfer Payments from Transactions</button>
@@ -21,9 +21,9 @@
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>Agent</label>
+                                        <label>Supper Agent</label>
                                         <select name="user_id" class="form-control" id="agentSelect">
-                                            <option value="">All Agents</option>
+                                            <option value="">All Supper Agents</option>
                                             @foreach($agents ?? [] as $agent)
                                                 <option value="{{ $agent->id }}"
                                                         data-pending="{{ $agent->pending_amount ?? 0 }}"
@@ -69,9 +69,9 @@
                                             <input type="checkbox" id="selectAll" class="form-check-input">
                                         </th>
                                         <th>#</th>
-                                        <th>Agent</th>
+                                        <th>Supper Agent</th>
                                         <th>Transferred Amount</th>
-                                        <th>Commission Amount</th>
+                                        <th>Super Agent Commission Amount</th>
                                         <th>Percentage</th>
                                         <th>Date</th>
                                     </tr>

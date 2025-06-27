@@ -5,16 +5,13 @@
     <div class="card shadow">
         <div class="card-header bg-success text-white">
             <h3 class="card-title">
-
-                    <i class="fas fa-download"></i> Sending Transfers from ({{ $regionName }})
-
+                <i class="fas fa-download"></i> My Sent Transfers
             </h3>
         </div>
 
         <div class="card-body table-responsive">
         <!-- Status Filter Buttons -->
     <div class="mb-3">
-
         <a href="{{ route('agent.sending.transfers', ['status' => 'completed']) }}" class="btn btn-success btn-sm">
             <i data-feather="check-circle"></i> Completed
         </a>
@@ -42,47 +39,37 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>Sender</th>
-                <th>Receiver</th>
-                <th>Amount</th>
-                <th>Region From</th>
-                <th>Region To</th>
+                <th>Transaction Code</th>
+                <th>Sent Amount</th>
                 <th>Date</th>
                 <th>Status</th>
-                <th>Details</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             @foreach($transactions as $transaction)
                 <tr data-created-by="{{ $transaction->created_by }}">
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $transaction->senderCustomer->name ?? '-' }}</td>
-                    <td>{{ $transaction->receiverCustomer->name ?? '-' }}</td>
+                    <td>{{ $transaction->transaction_code ?? 'N/A' }}</td>
                     <td>{{ number_format($transaction->amount, 2) }} Pound</td>
-                    <td>{{ $transaction->senderUser->region->name ?? 'No Region' }}</td>
-                    <td>{{ $transaction->region->name ?? 'No Region' }}</td>
                     <td>{{ $transaction->created_at->format('Y-m-d H:i') }}</td>
                     <td>
                    <span class="badge bg-secondary" data-current-status="{{ $transaction->status }}">
                    {{ $transaction->status }}
                    </span>
                     </td>
-
                     <td>
                     <a href="{{ route('transfers.show', $transaction->id) }}" class="btn btn-sm btn-xs btn-info">
-                            <i data-feather="eye"></i>
+                            <i data-feather="eye"></i> View
                         </a>
 
-
     @if($transaction->created_by === auth()->id())
-
  <button class="btn btn-sm btn-danger status-btn"
                                                     data-id="{{ $transaction->id }}"
                                                     data-status="rejected"
                                                     title="Reject">
                                                 <i data-feather="x-circle"></i>
                                             </button>
-
 @endif
 </td>
                 </tr>
@@ -105,15 +92,13 @@ $(document).ready(function () {
          const currentUserId = {{ auth()->id() }};
         const btn = $(this);
         const currentStatus = btn.closest('tr').find('span.badge').data('current-status');
-        const createdBy = btn.closest('tr').data('created-by'); // تأكد من إضافته في الـ <tr>
+        const createdBy = btn.closest('tr').data('created-by');
 
-    // منع التغيير إلا إذا كان المستخدم هو من أنشأ العملية
     if (['rejected', 'delivered', 'pending'].includes(currentStatus) && currentUserId !== createdBy) {
        alert(
   "Only the creator of this transaction can return it to 'completed'.\n" );
   return;
     }
-
 
         if (!confirm(`Are you sure you want to mark this as ${newStatus}?`)) return;
 
@@ -133,7 +118,7 @@ $(document).ready(function () {
      toastr.success('Status updated successfully.');
         setTimeout(() => {
         location.reload();
-         }, 1000); // إعادة تحميل الصفحة بعد ثانية واحدة
+         }, 1000);
             }
                 else {
                     toastr.error('Failed to update status.');
@@ -163,7 +148,7 @@ $(document).ready(function () {
             order: [[ 0, "desc" ]]
         });
 
-        feather.replace(); // Initialize Feather icons
+        feather.replace();
     });
 </script>
 @endpush

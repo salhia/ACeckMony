@@ -342,7 +342,7 @@ $agents = User::where('role', 'agent')
         User::create([
     'name' => $request->name,
     'username' => $request->username,
-  //  'email' => $request->email,
+   'email' => $request->username,
     'phone' => $request->phone,
     'address' => $request->address,
     'photo' => $save_url,

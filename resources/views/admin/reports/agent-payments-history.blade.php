@@ -8,8 +8,8 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h4 class="card-title">سجل دفعات الوكيل</h4>
-                            <a href="{{ route('admin.agent.payments.report') }}" class="btn btn-primary">العودة للدفعات المعلقة</a>
+                            <h4 class="card-title">Super Agent Payment History</h4>
+                            <a href="{{ route('admin.agent.payments.report') }}" class="btn btn-primary">Back to Pending Payments</a>
                         </div>
 
                         <!-- Filters -->
@@ -17,9 +17,9 @@
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>الوكيل</label>
+                                        <label>Super Agent</label>
                                         <select name="user_id" class="form-control">
-                                            <option value="">كل الوكلاء</option>
+                                            <option value="">All Super Agents</option>
                                             @foreach($agents ?? [] as $agent)
                                                 <option value="{{ $agent->id }}" {{ request('user_id') == $agent->id ? 'selected' : '' }}>
                                                     {{ $agent->name }}
@@ -30,20 +30,20 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>من تاريخ</label>
+                                        <label>From Date</label>
                                         <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>إلى تاريخ</label>
+                                        <label>To Date</label>
                                         <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>&nbsp;</label>
-                                        <button type="submit" class="btn btn-primary btn-block">بحث</button>
+                                        <button type="submit" class="btn btn-primary btn-block">Search</button>
                                     </div>
                                 </div>
                             </div>                        </form>
@@ -54,28 +54,28 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>الوكيل</th>
-                                        <th>المبلغ المحول</th>
-                                        <th>مبلغ العمولة</th>
-                                        <th>النسبة</th>
-                                        <th>تاريخ الدفع</th>
-                                        <th>ملاحظات</th>
+                                        <th>Super Agent</th>
+                                        <th>Transfer Amount</th>
+                                        <th>Super Agent Commission Amount</th>
+                                        <th>Percentage</th>
+                                        <th>Payment Date</th>
+                                        <th>Notes</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($payments ?? [] as $payment)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $payment->user->name ?? 'غير معروف' }}</td>
+                                        <td>{{ $payment->user->name ?? 'Unknown' }}</td>
                                         <td>{{ number_format($payment->trnsferamount ?? 0, 2) }}</td>
                                         <td>{{ number_format($payment->amount ?? 0, 2) }}</td>
                                         <td>{{ $payment->percentage ?? 0 }}%</td>
-                                        <td>{{ $payment->created_at ? $payment->created_at->format('Y-m-d H:i') : 'غير معروف' }}</td>
+                                        <td>{{ $payment->created_at ? $payment->created_at->format('Y-m-d H:i') : 'Unknown' }}</td>
                                         <td>{{ $payment->notes ?? '-' }}</td>
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="7" class="text-center">لا توجد مدفوعات مكتملة</td>
+                                        <td colspan="7" class="text-center">No completed payments found</td>
                                     </tr>
                                     @endforelse
                                 </tbody>
@@ -89,7 +89,7 @@
 
                         @if(request('user_id') && isset($agentPaidTotals[request('user_id')]))
                         <div class="alert alert-success mt-4 text-center">
-                            Paid Total for Agent <b>{{ $agents->where('id', request('user_id'))->first()->name ?? '' }}</b>:
+                            Paid Total for Super Agent <b>{{ $agents->where('id', request('user_id'))->first()->name ?? '' }}</b>:
                             <span style="font-weight:bold;">{{ number_format($agentPaidTotals[request('user_id')], 2) }}</span>
                         </div>
                         @endif

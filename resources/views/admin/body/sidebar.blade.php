@@ -20,16 +20,16 @@
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="collapse" href="#usersManagement" role="button" aria-expanded="false" aria-controls="usersManagement">
                     <i class="link-icon" data-feather="users"></i>
-                    <span class="link-title">Agent Management</span>
+                    <span class="link-title">Supper Agent Management</span>
                     <i class="link-arrow" data-feather="chevron-down"></i>
                 </a>
                 <div class="collapse" id="usersManagement">
                     <ul class="nav sub-menu">
                         <li class="nav-item">
-                            <a href="{{ route('all.superagent') }}" class="nav-link">Manage Agents</a>
+                            <a href="{{ route('all.superagent') }}" class="nav-link">Manage Supper Agents</a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('add.superagent') }}" class="nav-link">Add New Agent</a>
+                            <a href="{{ route('add.superagent') }}" class="nav-link">Add New Supper Agent</a>
                         </li>
                         <li class="nav-item">
                             <a href="#" class="nav-link">Manage Roles & Permissions</a>
@@ -74,7 +74,7 @@
                             <a href="#" class="nav-link">Transaction Reports</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">Agents Reports</a>
+                            <a href="#" class="nav-link">Supper Agents Reports</a>
                         </li>
                         <li class="nav-item">
                             <a href="#" class="nav-link">Financial Reports</a>

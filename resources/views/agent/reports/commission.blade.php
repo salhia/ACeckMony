@@ -86,8 +86,8 @@
                                     <th>Parent Agent</th>
                                     <th>Region</th>
                                     <th>Total Transactions</th>
-                                    <th>Total Commission</th>
-                                    <th>Average Commission</th>
+                                    <th>Total Vendor Commission</th>
+                                    <th>Average Vendor Commission</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>

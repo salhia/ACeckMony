@@ -8,7 +8,7 @@
     <div class="sidebar-body" id="sidebarAccordion">
         <ul class="nav">
 
-            <li class="nav-item nav-category">Agent Dashboard</li>
+            <li class="nav-item nav-category">Supper Agent Dashboard</li>
 
             <li class="nav-item">
                 <a href="{{ route('agent.dashboard') }}" class="nav-link">
@@ -80,7 +80,7 @@
                             <a href="{{ route('agent.user.transactions') }}" class="nav-link">User Transactions</a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('agent.commission.report') }}" class="nav-link">Commission Report</a>
+                            <a href="{{ route('agent.commission.report') }}" class="nav-link">Vendor Commission </a>
                         </li>
                         <li class="nav-item">
                             <a href="{{ route('agent.users.balance.report') }}" class="nav-link">Users Balance Report</a>

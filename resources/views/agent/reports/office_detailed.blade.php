@@ -66,7 +66,7 @@
                         <div class="col-md-3">
                             <div class="card border-warning">
                                 <div class="card-body">
-                                    <h5 class="card-title">Total Commission</h5>
+                                    <h5 class="card-title">Total Vendor Commission</h5>
                                     <h4 class="mt-2">{{ number_format($detailedReport->sum('total_commission'), 2) }} SSP</h2>
                                 </div>
                             </div>
@@ -84,7 +84,7 @@
                                     <th>Region</th>
                                     <th>Transactions</th>
                                     <th>Total Amount</th>
-                                    <th>Commission</th>
+                                    <th>Vendor Commission</th>
                                     <th>Net Amount</th>
                                     <th>Actions</th>
                                 </tr>

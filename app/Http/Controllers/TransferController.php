@@ -360,12 +360,7 @@ public function receivedTransfers(Request $request)
 public function SenderTransfers(Request $request)
 {
     $user = auth()->user();
-    $region_id = $user->region_id;
     $regionName = $user->region->name ?? 'Unknown Office';
-
-    if (!$region_id) {
-        return back()->withErrors(['error' => 'Your agent account does not have a state assigned.']);
-    }
 
     $status = $request->query('status');
     $dateFrom = $request->input('date_from', now()->toDateString());
@@ -378,9 +373,7 @@ public function SenderTransfers(Request $request)
             'receiverUser.region',
             'region'
         ])
-        ->whereHas('senderUser', function ($query) use ($region_id) {
-            $query->where('region_id', $region_id);
-        })
+        ->where('created_by', auth()->id()) // Only show transactions created by current user
         ->when($status, function ($query) use ($status) {
             $query->where('status', $status);
         })
