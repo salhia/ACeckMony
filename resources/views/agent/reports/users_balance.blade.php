@@ -41,7 +41,7 @@
                     <div class="card border-success">
                         <div class="card-body text-center">
                             <h6 class="card-title">Total Deposits</h6>
-                            <h4 class="text-success">{{ number_format($report->sum('deposits'), 2) }} SSP</h4>
+                            <h4 class="text-success">{{ number_format(array_sum(array_column($report, 'deposits') ?? []), 2) }} SSP</h4>
                         </div>
                     </div>
                 </div>
@@ -49,7 +49,7 @@
                     <div class="card border-info">
                         <div class="card-body text-center">
                             <h6 class="card-title">Total Commission</h6>
-                            <h4 class="text-info">{{ number_format($report->sum('commission'), 2) }} SSP</h4>
+                            <h4 class="text-info">{{ number_format(array_sum(array_column($report, 'commission') ?? []), 2) }} SSP</h4>
                         </div>
                     </div>
                 </div>
@@ -57,7 +57,7 @@
                     <div class="card border-warning">
                         <div class="card-body text-center">
                             <h6 class="card-title">Total Closing Balance</h6>
-                            <h4 class="text-warning">{{ number_format($report->sum('closing'), 2) }} SSP</h4>
+                            <h4 class="text-warning">{{ number_format(array_sum(array_column($report, 'closing') ?? []), 2) }} SSP</h4>
                         </div>
                     </div>
                 </div>
@@ -99,13 +99,13 @@
                     <tfoot>
                         <tr class="table-primary font-weight-bold">
                             <th>Total</th>
-                            <th class="text-end">{{ number_format($report->sum('opening'), 2) }}</th>
-                            <th class="text-end">{{ number_format($report->sum('deposits'), 2) }}</th>
-                            <th class="text-end">{{ number_format($report->sum('commission'), 2) }}</th>
-                            <th class="text-end">{{ number_format($report->sum('refill'), 2) }}</th>
-                            <th class="text-end">{{ number_format($report->sum('bank'), 2) }}</th>
-                            <th class="text-end">{{ number_format($report->sum('deductions'), 2) }}</th>
-                            <th class="text-end">{{ number_format($report->sum('closing'), 2) }}</th>
+                            <th class="text-end">{{ number_format(array_sum(array_column($report, 'opening') ?? []), 2) }}</th>
+                            <th class="text-end">{{ number_format(array_sum(array_column($report, 'deposits') ?? []), 2) }}</th>
+                            <th class="text-end">{{ number_format(array_sum(array_column($report, 'commission') ?? []), 2) }}</th>
+                            <th class="text-end">{{ number_format(array_sum(array_column($report, 'refill') ?? []), 2) }}</th>
+                            <th class="text-end">{{ number_format(array_sum(array_column($report, 'bank') ?? []), 2) }}</th>
+                            <th class="text-end">{{ number_format(array_sum(array_column($report, 'deductions') ?? []), 2) }}</th>
+                            <th class="text-end">{{ number_format(array_sum(array_column($report, 'closing') ?? []), 2) }}</th>
                         </tr>
                     </tfoot>
                 </table>
