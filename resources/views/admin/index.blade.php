@@ -72,13 +72,13 @@
                 <div class="col-md-3 grid-margin stretch-card">
                     <div class="card">
                         <div class="card-body">
-                            <h6 class="card-title mb-0">{{ $stats['region'][$stat]['label'] ?? '' }}</h6>
+                            <h6 class="card-title mb-0">{{ $stats['sendRegion'][$stat]['label'] ?? '' }}</h6>
                             <div class="row">
                                 <div class="col-12">
-                                    <h3 class="mb-2">{{ number_format($stats['region'][$stat]['total'] ?? 0, 2) }}</h3>
+                                    <h3 class="mb-2">{{ number_format($stats['sendRegion'][$stat]['total'] ?? 0, 2) }}</h3>
                                     <div class="d-flex align-items-baseline">
                                         <p class="text-success">
-                                            <span>Today: {{ number_format($stats['region'][$stat]['today'] ?? 0, 2) }}</span>
+                                            <span>Today: {{ number_format($stats['sendRegion'][$stat]['today'] ?? 0, 2) }}</span>
                                             <i data-feather="arrow-up" class="icon-sm mb-1"></i>
                                         </p>
                                     </div>
@@ -266,13 +266,13 @@ $(function() {
         },
         series: [{
             name: 'Sent Amount',
-            data: {!! json_encode($stats['region']['chart_data']['sent'] ?? []) !!}
+            data: {!! json_encode($stats['sendRegion']['chart_data']['sent'] ?? []) !!}
         }, {
             name: 'Received Amount',
-            data: {!! json_encode($stats['region']['chart_data']['received'] ?? []) !!}
+            data: {!! json_encode($stats['sendRegion']['chart_data']['received'] ?? []) !!}
         }],
         xaxis: {
-            categories: {!! json_encode($stats['region']['chart_data']['dates'] ?? []) !!},
+            categories: {!! json_encode($stats['sendRegion']['chart_data']['dates'] ?? []) !!},
             labels: {
                 rotate: -45,
                 style: {
