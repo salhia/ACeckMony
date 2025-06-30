@@ -54,7 +54,7 @@
                         </div>
                         <div class="col-md-3">
                             <div class="border rounded p-3">
-                                <h6>Total Admin Fee</h6>
+                                <h6>Total Vendor Commission</h6>
                                 <h3>{{ number_format($transactions->sum('admin_fee'), 2) }}</h3>
                             </div>
                         </div>
@@ -83,7 +83,7 @@
                                     <th>State</th>
                                     <th>Total Amount</th>
                                     <th>Transactions</th>
-                                    <th>Admin Fee</th>
+                                    <th>Vendor Commission</th>
                                     <th>Average Amount</th>
                                 </tr>
                             </thead>
@@ -118,7 +118,7 @@
                                     <th>Agent</th>
                                     <th>Total Amount</th>
                                     <th>Transactions</th>
-                                    <th>Admin Fee</th>
+                                    <th>Vendor Commission</th>
                                     <th>Average Amount</th>
                                 </tr>
                             </thead>
@@ -157,7 +157,7 @@
                                     <th>State</th>
                                     <th>Agent</th>
                                     <th>Amount</th>
-                                    <th>Admin Fee</th>
+                                    <th>Vendor Commission</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>

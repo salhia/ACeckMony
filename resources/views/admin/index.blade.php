@@ -164,7 +164,7 @@
                                         <th>State</th>
                                         <th>Total Amount</th>
                                         <th>Transactions</th>
-                                        <th>Admin Fee</th>
+                                        <th>Vendor Commission</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -197,7 +197,7 @@
                                         <th>Agent</th>
                                         <th>Total Amount</th>
                                         <th>Transactions</th>
-                                        <th>Admin Fee</th>
+                                        <th>Vendor Commission</th>
                                     </tr>
                                 </thead>
                                 <tbody>

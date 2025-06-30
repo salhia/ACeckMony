@@ -54,7 +54,7 @@ class AdminController extends Controller
                     'total' => $allTransactions->sum('amount')
                 ],
                 'commission' => [
-                    'label' => 'Total Admin Fee',
+                    'label' => 'Total Vendor Commission',
                     'today' => $todayTransactions->sum('admin_fee'),
                     'total' => $allTransactions->sum('admin_fee')
                 ],

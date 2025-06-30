@@ -315,7 +315,7 @@ Route::domain('akec.money')->group(function () {
     Route::post('/verify-qr', [TransferVerificationController::class, 'verifyQrCode'])->name('api.transfers.verify-qr');
 });
 
-// Admin Fee Routes
+// Vendor Commission Routes
 Route::middleware(['auth', 'roles:admin'])->group(function () {
     // Agent Payments Routes
     Route::prefix('admin')->name('admin.')->group(function () {

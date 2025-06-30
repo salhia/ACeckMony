@@ -197,7 +197,7 @@
                 <div>{{ number_format($transaction->commission, 2) }}</div>
             </div>
             <div class="amount-row">
-                <div>Admin Fee:</div>
+                <div>Vendor Commission:</div>
                 <div>{{ number_format($transaction->admin_fee, 2) }}</div>
             </div>
             <div class="amount-row">
