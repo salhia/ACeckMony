@@ -5,7 +5,7 @@
     @if(isset($pendingAmount) && isset($paidAmount))
         <div class="alert alert-info d-flex justify-content-between align-items-center">
             <div>
-                <strong>Pending Amount:</strong> {{ number_format($pendingAmount, 2) }} SSP<br>
+                <strong>Vendor Amount:</strong> {{ number_format($pendingAmount, 2) }} SSP<br>
                 <strong>Paid Amount:</strong> {{ number_format($paidAmount, 2) }} SSP
             </div>
             <a href="{{ route('agent.payments.history') }}" class="btn btn-primary btn-sm">
