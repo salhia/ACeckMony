@@ -31,6 +31,16 @@
             <input type="date" name="date_to" class="form-control" value="{{ request('date_to', now()->toDateString()) }}">
         </div>
         <div class="col-auto">
+            <select name="region_id" class="form-control">
+                <option value="">All Regions</option>
+                @foreach($regions as $region)
+                    <option value="{{ $region->id }}" {{ request('region_id') == $region->id ? 'selected' : '' }}>
+                        {{ $region->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-auto">
             <button type="submit" class="btn btn-primary">Filter</button>
         </div>
     </form>
@@ -41,6 +51,7 @@
                 <th>#</th>
                 <th>Transaction Code</th>
                 <th>Sent Amount</th>
+                <th>Send Region</th>
                 <th>Date</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -52,6 +63,13 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $transaction->transaction_code ?? 'N/A' }}</td>
                     <td>{{ number_format($transaction->amount, 2) }} Pound</td>
+                    <td>
+                        @if($transaction->region)
+                            <span class="badge bg-info">{{ $transaction->region->name }}</span>
+                        @else
+                            <span class="text-muted">N/A</span>
+                        @endif
+                    </td>
                     <td>{{ $transaction->created_at->format('Y-m-d H:i') }}</td>
                     <td>
                    <span class="badge bg-secondary" data-current-status="{{ $transaction->status }}">

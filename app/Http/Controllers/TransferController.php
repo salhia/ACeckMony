@@ -365,6 +365,7 @@ public function SenderTransfers(Request $request)
     $status = $request->query('status');
     $dateFrom = $request->input('date_from', now()->toDateString());
     $dateTo = $request->input('date_to', now()->toDateString());
+    $regionId = $request->input('region_id');
 
     $transactions = SysTransaction::with([
             'senderCustomer',
@@ -377,12 +378,18 @@ public function SenderTransfers(Request $request)
         ->when($status, function ($query) use ($status) {
             $query->where('status', $status);
         })
+        ->when($regionId, function ($query) use ($regionId) {
+            $query->where('region_id', $regionId);
+        })
         ->whereDate('created_at', '>=', $dateFrom)
         ->whereDate('created_at', '<=', $dateTo)
         ->latest()
         ->get();
 
-    return view('agentuser.transfers.sending', compact('transactions', 'regionName'));
+    // Get all regions for the filter dropdown
+    $regions = SysRegion::all();
+
+    return view('agentuser.transfers.sending', compact('transactions', 'regionName', 'regions'));
 }
 
 
