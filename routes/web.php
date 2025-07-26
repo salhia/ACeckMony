@@ -293,6 +293,7 @@ Route::post('/profile/update-password', [ProfileController::class, 'updatePasswo
    Route::post('/cashbox/bank', [CashBoxController::class, 'storeBank'])->name('cashbox.bank.store');
 
 Route::get('/cashbox/daily-report', [CashBoxController::class, 'dailyReport'])->name('cashbox.daily.report');
+Route::get('/cashbox/grouped-report', [CashBoxController::class, 'groupedReport'])->name('cashbox.grouped.report');
 
 
 });

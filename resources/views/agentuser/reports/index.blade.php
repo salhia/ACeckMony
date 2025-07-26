@@ -55,7 +55,7 @@
                                 <div class="mb-3">
                                     <label class="form-label">Agent</label>
                                     <select class="form-select" name="agent_id">
-                                        <option value="">All Agents</option>
+                                        <option value="all">All Agents</option>
                                         @foreach($agents as $agent)
                                             <option value="{{ $agent->id }}">{{ $agent->name }}</option>
                                         @endforeach

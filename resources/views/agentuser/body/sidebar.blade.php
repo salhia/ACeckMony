@@ -61,6 +61,12 @@
                     <li class="nav-item">
                         <a href="{{ route('cashbox.bank.form') }}" class="nav-link">Bank Deposit</a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('cashbox.daily.report') }}" class="nav-link">Daily Report</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('cashbox.grouped.report') }}" class="nav-link">Grouped Report</a>
+                    </li>
 
                    </ul>
                 </div>
@@ -110,12 +116,6 @@
                         </li>
                     </ul>
                 </div>
-            </li>
-
-            <li class="nav-item">
-                <a href="{{ route('cashbox.daily.report') }}" class="nav-link">
-                    <i class="fas fa-file-alt"></i> Daily Cashbox Report
-                </a>
             </li>
 
         </ul>

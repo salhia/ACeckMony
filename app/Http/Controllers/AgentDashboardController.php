@@ -144,8 +144,6 @@ class AgentDashboardController extends Controller
             ));
 
         } catch (\Exception $e) {
-            \Log::error('Dashboard Error: ' . $e->getMessage());
-            \Log::error('Stack Trace: ' . $e->getTraceAsString());
             return view('agentuser.index')->with('error', 'Error loading data');
         }
     }
@@ -192,7 +190,7 @@ class AgentDashboardController extends Controller
                 'senderCustomer',
                 'receiverCustomer',
                 'senderAgent',
-                'senderregion' // Add new relationship
+                'senderRegion'
             ])
             ->orderBy('created_at', 'desc')
             ->take(10)
@@ -208,7 +206,7 @@ class AgentDashboardController extends Controller
                 'senderCustomer',
                 'receiverCustomer',
                 'senderAgent',
-                'senderregion' // Add new relationship
+                'senderRegion'
             ])
             ->orderBy('created_at', 'desc')
             ->take(10)
@@ -222,30 +220,38 @@ class AgentDashboardController extends Controller
         $region_id = $user->region_id;
         $type = $request->get('type', 'daily'); // default to daily if no type specified
 
+        // Get agents in the same region (excluding admins)
+        $agents = User::where('region_id', $region_id)
+                     ->where('role', '!=', 'admin')
+                     ->select('id', 'name')
+                     ->get();
+
         $view_data = [
             'region' => SysRegion::find($region_id),
-            'agents' => User::where('region_id', $region_id)->get(),
+            'agents' => $agents,
             'type' => $type
         ];
 
         return view('agentuser.reports.index', $view_data);
     }
 
-    public function getReportsData(Request $request)
+        public function getReportsData(Request $request)
     {
         try {
             $request->validate([
                 'start_date' => 'required|date',
                 'end_date' => 'required|date|after_or_equal:start_date',
-                'agent_id' => 'nullable|exists:users,id',
+                'agent_id' => 'nullable',
                 'type' => 'nullable|in:daily,sent,received,commission,summary'
             ]);
 
             $user = Auth::user();
             $region_id = $user->region_id;
             $type = $request->get('type', 'daily');
+
             // Base query
             $query = SysTransaction::query();
+
             // Apply different filters based on report type
             switch ($type) {
                 case 'sent':
@@ -261,7 +267,6 @@ class AgentDashboardController extends Controller
                           ->orWhere('sender_region_id', $region_id);
                     })->whereNotNull('commission');
                     break;
-
                 case 'summary':
                     $query->where(function($q) use ($region_id) {
                         $q->where('region_id', $region_id)
@@ -282,11 +287,15 @@ class AgentDashboardController extends Controller
                 Carbon::parse($request->end_date)->endOfDay()
             ]);
 
-            // Agent filter
-            if ($request->filled('agent_id')) {
-                $query->where(function($q) use ($request) {
-                    $q->where('sender_agent_id', $request->agent_id)
-                      ->orWhere('receiver_agent_id', $request->agent_id);
+            // Agent filter - Fixed to check the correct agent fields
+            if ($request->filled('agent_id') && $request->agent_id != '' && $request->agent_id != 'all') {
+                $agent_id = $request->agent_id;
+                $query->where(function($q) use ($agent_id) {
+                    $q->where('sender_user_id', $agent_id)
+                      ->orWhere('sender_agent_id', $agent_id)
+                      ->orWhere('receiver_agent_id', $agent_id)
+                      ->orWhere('agent_id', $agent_id)
+                      ->orWhere('created_by', $agent_id);
                 });
             }
 
@@ -296,15 +305,8 @@ class AgentDashboardController extends Controller
                 'receiverCustomer',
                 'senderAgent',
                 'receiverAgent',
-                'senderregion'
+                'senderRegion'
             ])->orderBy('created_at', 'desc')->get();
-
-            \Log::info(
-                'Query here: ' . vsprintf(
-                    str_replace('?', "'%s'", $query->toSql()),
-                    $query->getBindings()
-                )
-            );
 
             // Calculate statistics
             $stats = [
@@ -318,7 +320,6 @@ class AgentDashboardController extends Controller
                 ->render();
 
         } catch (\Exception $e) {
-            \Log::error('Report generation error: ' . $e->getMessage());
             return response()->json([
                 'error' => 'Error generating report',
                 'message' => $e->getMessage()

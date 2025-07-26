@@ -128,4 +128,78 @@ class CashBoxController extends Controller
             'date', 'transactions', 'opening', 'deposits', 'withdrawals', 'refill', 'bank', 'commission', 'closing', 'pendingRefills', 'deductions'
         ));
     }
+
+    public function groupedReport(Request $request)
+    {
+        $userId = auth()->id();
+        $startDate = $request->input('start_date', Carbon::today()->subDays(7)->toDateString());
+        $endDate = $request->input('end_date', Carbon::today()->toDateString());
+
+        // Get all transactions in date range
+        $transactions = CashBoxTransaction::where('user_id', $userId)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderBy('date')
+            ->orderBy('created_at')
+            ->get();
+
+        // Group transactions by date
+        $dailyTransactions = $transactions->groupBy('date');
+
+        // Calculate daily totals for each date
+        $dailyTotals = [];
+        $grandTotals = [
+            'opening' => 0,
+            'deposit' => 0,
+            'commission' => 0,
+            'refill' => 0,
+            'bank' => 0,
+            'withdraw' => 0,
+        ];
+
+        foreach ($dailyTransactions as $date => $dayTransactions) {
+            $dailyTotals[$date] = [
+                'opening' => $dayTransactions->where('type', 'opening')->sum('amount'),
+                'deposit' => $dayTransactions->where('type', 'deposit')->sum('amount'),
+                'commission' => $dayTransactions->where('type', 'commission')->sum('amount'),
+                'refill' => $dayTransactions->where('type', 'refill')->where('approved', true)->sum('amount'),
+                'bank' => $dayTransactions->where('type', 'bank')->sum('amount'),
+                'withdraw' => $dayTransactions->where('type', 'withdraw')->sum('amount'),
+            ];
+
+            // Add to grand totals
+            foreach ($dailyTotals[$date] as $type => $amount) {
+                $grandTotals[$type] += $amount;
+            }
+
+            // Calculate net amount for this day
+            $dailyTotals[$date]['net'] = $dailyTotals[$date]['opening'] +
+                                        $dailyTotals[$date]['deposit'] +
+                                        $dailyTotals[$date]['commission'] +
+                                        $dailyTotals[$date]['refill'] +
+                                        $dailyTotals[$date]['bank'] +
+                                        $dailyTotals[$date]['withdraw'];
+        }
+
+        // Calculate grand totals
+        $totalDeposits = $grandTotals['deposit'] + $grandTotals['commission'];
+        $totalDeductions = abs($grandTotals['withdraw']);
+        $netAmount = $grandTotals['opening'] +
+                    $grandTotals['deposit'] +
+                    $grandTotals['commission'] +
+                    $grandTotals['refill'] +
+                    $grandTotals['bank'] +
+                    $grandTotals['withdraw'];
+
+        // Get pending refills
+        $pendingRefills = CashBoxTransaction::where('user_id', $userId)
+            ->where('type', 'refill')
+            ->where('approved', false)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->get();
+
+        return view('agentuser.cashbox.grouped_report', compact(
+            'startDate', 'endDate', 'dailyTotals', 'grandTotals',
+            'totalDeposits', 'totalDeductions', 'netAmount', 'pendingRefills'
+        ));
+    }
 }
